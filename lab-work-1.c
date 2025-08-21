@@ -16,9 +16,9 @@ int lsbXRestY() {
 	int lsbX = x & mask; // 0x000000EF
 	
 	mask = ~0xFF; // 11111...00000000
-	int msbsY = y & mask;
+	int msbsY = y & mask; // 0x76543200
 	
-	return msbsY + lsbX;
+	return msbsY + lsbX; // 0x765432EF
 } 
 
 /*
