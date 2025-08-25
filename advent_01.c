@@ -14,7 +14,7 @@
  * (2) iterate through and tally the differences between the points
  */
 
-int sort(int *nums, int length);
+int sort(int *nums, int low, int high);
 int freeListStr(char **strs, int length);
 int freeListInt(int *nums, int length);
 char **split(char *str, char delim, int length);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
   // } // end loop
   // printf("\n");
   
-  sort(ints1, length1);
+  sort(ints1, 0, (length1 - 1));
   // sort(ints2, length2); // TODO: uncomment
 
   freeListInt(ints1, length1);
@@ -124,8 +124,13 @@ char **split(char *str, char delim, int length) {
   return numStrings;
 } // end method
 
-int sort(int *nums, int length) {
-  
+/**
+ * this is just a signature for an in place sort.
+ * we will start by implementing merge sort, 
+ * since it's not hard, but not too easy (looking at you, bubblesort ;) ) 
+ */
+int sort(int *nums, int low, int high) {
+
   return 0;
 } // end method
 
