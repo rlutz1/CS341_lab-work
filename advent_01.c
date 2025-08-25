@@ -17,6 +17,7 @@
 int sort(int *nums, int low, int high);
 int freeListStr(char **strs, int length);
 int freeListInt(int *nums, int length);
+int calcDistance(int *nums1, int length1, int *nums2, int length2);
 char **split(char *str, char delim, int length);
 int *parseInt(char ** strs, int length);
 void print(int *nums, int length);
@@ -64,12 +65,13 @@ int main(int argc, char *argv[]) {
   sort(ints2, 0, (length2 - 1));
   print(ints2, length2);
 
-  // and now finally
+  // and now finally, lets compare distance i guess?? 
+  // this has been a journey today lol, good review, yeesh
+  int distance = calcDistance(ints1, length1, ints2, length2);
+  printf("Distance between two lists calculated as: %d\n", distance);
 
   freeListInt(ints1, length1);
   freeListInt(ints2, length2);
-
-
 
   return 0;
 } // end main method
@@ -193,7 +195,36 @@ int sort(int *nums, int low, int high) {
   return 0;
 } // end method
 
+/**
+ * the final piece. we assume we get sorted lists, no checking here.
+ * calculate the total distance between the 2 lists.
+ */
+int calcDistance(int *nums1, int length1, int *nums2, int length2) {
+  int i = 0; int j = 0; int tally = 0;
 
+
+  while (i < length1 && j < length2) {
+    if (*(nums1 + i) < *(nums2 + j)) {
+       tally += (*(nums2 + j) - *(nums1 + i));
+    } else {
+      tally += (*(nums1 + i) - *(nums2 + j));
+    } // end if
+    i++; j++;
+  } // end loop
+
+  // i am making assumption lists don't have to be same length.
+  // this is not specified by the problem.
+  while (i < length1) {
+    tally += *(nums1 + i); i++;
+  } // end loop
+
+  while (j < length2) {
+    tally += *(nums2 + j); j++;
+  } // end loop
+
+  return tally;
+ 
+} // end method
 
 /**
  * turn a list of strings
