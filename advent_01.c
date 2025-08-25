@@ -61,7 +61,10 @@ int main(int argc, char *argv[]) {
   
   sort(ints1, 0, (length1 - 1));
   print(ints1, length1);
-  // sort(ints2, length2); // TODO: uncomment
+  sort(ints2, 0, (length2 - 1));
+  print(ints2, length2);
+
+  // and now finally
 
   freeListInt(ints1, length1);
   freeListInt(ints2, length2);
