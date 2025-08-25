@@ -14,31 +14,57 @@
  * (2) iterate through and tally the differences between the points
  */
 
-int sort();
-int freeStrings(char **strs, int numStrs);
-char **split(char *str, char delim);
+int sort(int *nums, int length);
+int freeListStr(char **strs, int length);
+int freeListInt(int *nums, int length);
+char **split(char *str, char delim, int length);
+int *parseInt(char ** strs, int length);
 
 int main(int argc, char *argv[]) {
 
-  if (argc < 3) { return 2; } // not enough arg, quick check
+  if (argc < 5) { return 2; } // not enough arg, quick check
 
   // we're gonna assume that the lists are passed in format
   // "1, 2, 3" => single string, vals separated by commas
   // no error checking will be done here since i'm the only one using, lol
   
-  char **strs1 = split(argv[1], ',');
-  
-  char **strs2 = split(argv[2], ',');
+  int length1 = atoi(argv[2]);
+  if (length1 == 0) { return 1; }
 
+  int length2 = atoi(argv[4]);
+  if (length2 == 0) { return 1; }
 
-  freeStrings(strs1, 3);
-  freeStrings(strs2, 4);
-  // for (int i = 1; i < argc; i++) { // note that i = 0 prints the exe file path
-  //   printf("entered: %s\n", argv[i]);
+  char **strs1 = split(argv[1], ',', length1);
+  char **strs2 = split(argv[3], ',', length2);
+
+  int *ints1 = parseInt(strs1, length1);
+  freeListStr(strs1, length1);
+  if (ints1 == NULL) { return 2; }
+
+  // printf("INTS 1: \n");
+  // for (int i = 0; i < length1; i++) {
+  //   printf("%d | ", *(ints1 + i));
   // } // end loop
+  // printf("\n");
 
-  // free(list1);
-  // free(list2);
+
+  int *ints2 = parseInt(strs2, length2);
+  freeListStr(strs2, length2);
+  if (ints2 == NULL) { return 2; }
+  
+  // printf("INTS 2: \n");
+  // for (int i = 0; i < length2; i++) {
+  //   printf("%d | ", *(ints2 + i));
+  // } // end loop
+  // printf("\n");
+  
+  sort(ints1, length1);
+  // sort(ints2, length2); // TODO: uncomment
+
+  freeListInt(ints1, length1);
+  freeListInt(ints2, length2);
+
+
 
   return 0;
 } // end main method
@@ -46,73 +72,109 @@ int main(int argc, char *argv[]) {
 /** 
  * (1) take in a string with expected "1, 2, 3" 
  * (2) split up on the ','
- * (3) return the allocated int *
+ * (3) return the allocated char **
+ * 
+ * heads up that this is BY NO MEANS thoroughly error checked.
  */
-char **split(char *str, char delim) {
-  // int length = sizeof(str) / sizeof(*str);
+char **split(char *str, char delim, int length) {
   
-  // printf("%d\n", length);
-  // printf("%s")
+  char *num = malloc(10 * sizeof(char)); // should just be 1 (byte), can have up to 10 digits in int
+  if (num == NULL) { return NULL; } // null pointer check
+  int numCounter = 0; // init temp string counter
 
-  // for (int i = 0; i < str)
-  int i = 0; int nums = 0;
+  char **numStrings = malloc(length * sizeof(num)); // TODO: hardcoded 10 num strings
+  if (numStrings == NULL) { return NULL; } // null pointer check
+  int numStringsCounter = 0; // number of strings, for indexing
 
-  char *temp = malloc(10 * sizeof(char)); // should just be 1 (byte), can have up to 10 digits in int
-  if (temp == NULL) { return NULL; }
-  int tempCounter = 0;
-
-  char **numStrings = malloc(10 * sizeof(temp)); // TODO: hardcoded 10 num strings
-  if (numStrings == NULL) { return NULL; }
-  int numStringsCounter = 0;
-
+  int i = 0;
   while (*(str + i) != '\0') { // while not null terminating character
     
     if (*(str + i) == delim) { // if we find the delim
-      if (tempCounter > 0) { // if we have a non empty number
-        // add it to the other list
-        *(numStrings + numStringsCounter) = temp;
+      if (numCounter > 0) { // if we have a non empty number
+        // add it to the list of strings
+        *(numStrings + numStringsCounter) = num;
         numStringsCounter++;
-        temp = malloc(10 * sizeof(char));
-        if (temp == NULL) { return NULL; }
-        tempCounter = 0;
-        printf("Adding a number: %s\n", *(numStrings + numStringsCounter - 1));
+        num = malloc(10 * sizeof(char)); // set aside more memory for next number
+        if (num == NULL) { return NULL; } // null pointer check
+        numCounter = 0; // reset the temp num counter
+        printf("Added a number: %s\n", *(numStrings + numStringsCounter - 1));
       } // end if
     } else {
-      if (*(str + i) != ' ') {
-        *(temp + tempCounter) = *(str + i);
-        tempCounter++;
+      if (*(str + i) != ' ') { // ignore whitespaces
+        *(num + numCounter) = *(str + i); // add the character to the temp
+        numCounter++;
         // printf("Adding to temp.");
-        printf("Adding to temp: %c\n", *(temp + tempCounter - 1));
-      }
+        printf("Added to temp: %c\n", *(num + numCounter - 1));
+      } // end if
       
     }
-    i++;
+    i++; // increment to next char regardless
   } // end loop
 
-  if (tempCounter > 0) { // if we have a non empty number
+  if (numCounter > 0) { // if we have a non empty number, final dump
     // add it to the other list
-    *(numStrings + numStringsCounter) = temp;
-    printf("Adding a final number: %s\n", *(numStrings + numStringsCounter));
+    *(numStrings + numStringsCounter) = num;
+    numStringsCounter++; // not necessary logically, but for error printing.
+    printf("Added to temp: %s\n", *(numStrings + numStringsCounter - 1));
   } // end if
 
-  if (numStringsCounter < 10) { numStrings = realloc(numStrings, numStringsCounter * sizeof(temp)); }
+  // reallocate the size as needed.
+  // if (numStringsCounter < 10) { numStrings = realloc(numStrings, numStringsCounter * sizeof(num)); }
+  if (numStringsCounter != length) { printf("Processed %d numbers, but was told there are %d numbers.\n", numStringsCounter, length); }
   return numStrings;
 } // end method
 
-int sort() {
+int sort(int *nums, int length) {
+  
   return 0;
 } // end method
 
-int freeStrings(char **strs, int numStrs) {
-  int length = sizeof(strs) / sizeof(char *);
-  printf("Length: %d\n", length);
-  // printf("size of strs: %d\n", sizeof(strs));
-  // printf("sizeof *strs: %d\n", sizeof(*strs));
-  for(int i = 0; i < numStrs; i++) {
-    printf("Freeing: %s\n", *(strs + i));
-    free(*(strs + i));
+/**
+ * turn a list of strings
+ * into a list of ints.
+ * return null if anything goes wrong.
+ */
+int *parseInt(char **strs, int length) {
+
+  int *nums = malloc(length * sizeof(int));
+  int num;
+
+  for (int i = 0; i < length; i++) {
+    num = atoi(*(strs + i));
+    if (num == 0 && **(strs + i) != '0') { // error catching for atoi
+      free(nums);
+      return NULL;
+    } // end if
+
+    // if a valid number was converted, add it to nums
+    *(nums + i) = num;
+  } // end loop
+
+  return nums;
+} // end method
+
+int freeListStr(char **elements, int length) {
+  // int length = sizeof(strs) / sizeof(char *);
+  // printf("Length: %d\n", length);
+
+  for(int i = 0; i < length; i++) {
+    printf("Freeing: %s\n", *(elements + i));
+    free(*(elements + i));
   } // end loop
   printf("Freeing pointer.\n");
-  free(strs);
+  free(elements);
   return 0;
-}
+} // end method
+
+int freeListInt(int *elements, int length) {
+  // int length = sizeof(strs) / sizeof(char *);
+  // printf("Length: %d\n", length);
+
+  // for(int i = 0; i < length; i++) {
+  //   printf("Freeing: %d\n", *(elements + i));
+  //   free(*(elements + i));
+  // } // end loop
+  printf("Freeing pointer.\n");
+  free(elements);
+  return 0;
+} // end method
