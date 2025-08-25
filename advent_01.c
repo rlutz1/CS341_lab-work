@@ -19,6 +19,7 @@ int freeListStr(char **strs, int length);
 int freeListInt(int *nums, int length);
 char **split(char *str, char delim, int length);
 int *parseInt(char ** strs, int length);
+void print(int *nums, int length);
 
 int main(int argc, char *argv[]) {
 
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
   // printf("\n");
   
   sort(ints1, 0, (length1 - 1));
+  print(ints1, length1);
   // sort(ints2, length2); // TODO: uncomment
 
   freeListInt(ints1, length1);
@@ -124,15 +126,71 @@ char **split(char *str, char delim, int length) {
   return numStrings;
 } // end method
 
+
+/**
+ * helper for sorting/general use
+ */
+void swap(int *nums, int low, int high) {
+  int temp = *(nums + low);
+  *(nums + low) = *(nums + high);
+  *(nums + high) = temp; 
+} // end method
+
+/**
+ * the merging step, you fucking moron.
+ * oh and fresh reminder that you don't merge in place
+ * dummy, real nice.
+ */
+void merge(int *nums, int low1, int high1, int low2, int high2) {
+
+  int *temp = malloc((high2 - low1 + 1) * sizeof(int));
+  int i = low1; int j = low2; int t = 0;
+
+  while (i <= high1 && j <= high2) {
+    if (*(nums + i) < *(nums + j)) {
+      *(temp + t) = *(nums + i); i++;
+    } else {
+      *(temp + t) = *(nums + j); j++;
+    } // end if
+    
+    t++;
+  } // end loop
+
+  while (i <= high1) {
+    *(temp + t) = *(nums + i); i++; t++;
+  } // end loop
+
+  while (j <= high2) {
+    *(temp + t) = *(nums + j); j++; t++;
+  } // end loop
+  
+  // copy over the temp vals
+  for (i = 0, j = low1; i < t; i++, j++) {
+    *(nums + j) = *(temp + i);
+  } // end loop
+
+  freeListInt(temp, t); // free temp memory
+} // end method
+
 /**
  * this is just a signature for an in place sort.
  * we will start by implementing merge sort, 
  * since it's not hard, but not too easy (looking at you, bubblesort ;) ) 
  */
 int sort(int *nums, int low, int high) {
+  if (low >= high) { return 0; }
+  if (high - low == 1) { // not really necessary, but i like this style
+     if (*(nums + low) > *(nums + high)) { swap(nums, low, high); return 0; } // end if
+  } // end if
 
+  int mid = (high + low) / 2;
+  sort(nums, low, mid);
+  sort(nums, mid + 1, high);
+  merge(nums, low, mid, mid + 1, high);
   return 0;
 } // end method
+
+
 
 /**
  * turn a list of strings
@@ -182,4 +240,13 @@ int freeListInt(int *elements, int length) {
   printf("Freeing pointer.\n");
   free(elements);
   return 0;
+} // end method
+
+
+void print( int *nums, int length) {
+  printf("INTS: \n");
+  for (int i = 0; i < length; i++) {
+    printf("%d ", *(nums + i));
+  } // end loop
+  printf("\n");
 } // end method
