@@ -1,7 +1,9 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * NAME:    Roxanne Lutz
+ * USER ID: rlutz1
+ * A#:      101990885
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -12,6 +14,13 @@
  * it's not good practice to ignore compiler warnings, but in this
  * case it's OK.  
  */
+
+ /*
+  * NOTES FOR ROXANNE: 
+  * + only edit this file
+  * + can only use: !  ̃  & ˆ | + << >> (unless otherwise stated)
+  * + no constants longer than 8 bits
+  */
 
 #if 0
 /*
