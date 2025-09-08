@@ -217,7 +217,7 @@ int evenBits(void) {
 unsigned float_abs(unsigned uf) {
   return 2;
 }
-/*
+/* 
  * isTmin - returns 1 if x is the minimum, two's complement number,
  *     and 0 otherwise 
  *   Legal ops: ! ~ & ^ | +
@@ -225,5 +225,11 @@ unsigned float_abs(unsigned uf) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  return 2;
+   // printf("x: %x\n", x);
+   //  printf("&: %x\n", (0x80000000 & x));
+   // printf("&: %x\n", (0x7FFFFFFF ^ x));
+  if ((0x7FFFFFFF ^ x) == 0xFFFFFFFF) {
+      return 1;
+  }
+  return 0;
 }
