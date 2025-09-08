@@ -18,7 +18,7 @@
  /*
   * NOTES FOR ROXANNE: 
   * + only edit this file
-  * + can only use: !  ̃  & ˆ | + << >> (unless otherwise stated)
+  * + can only use: ! ̃  & ˆ | + << >> (unless otherwise stated)
   * + no constants longer than 8 bits
   */
 
@@ -183,7 +183,10 @@ NOTES:
  *   Rating: 2
  */
 int copyLSB(int x) {
-  return 2;
+   // (1) and x with 0001 to carve out the LSBit. returns either 0001 or 0000
+   // (2) not, creating either 1110 or 1111
+   // (3) + 1, returning either 1111 or 0000
+  return ~(x & 1) + 1;
 }
 /* 
  * evenBits - return word with all even-numbered bits set to 1
