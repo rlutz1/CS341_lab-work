@@ -228,8 +228,22 @@ int isTmin(int x) {
    // printf("x: %x\n", x);
    //  printf("&: %x\n", (0x80000000 & x));
    // printf("&: %x\n", (0x7FFFFFFF ^ x));
-  if ((0x7FFFFFFF ^ x) == 0xFFFFFFFF) {
-      return 1;
-  }
-  return 0;
+//   if ((0x7FFFFFFF ^ x) == 0xFFFFFFFF) {
+//       return 1;
+//   }
+//   return 0;
+   // return !((0x80 << 24) ^ x); // SO ANNOYING THAT THIS WORKS
+   
+   // bad attempt
+   // int acc = 0xFF;
+
+   // x += acc;
+   // x += acc;
+   // x += acc;
+   // x += acc;
+   // x += 1;
+   // printf("%x\n", x);
+
+   // return !x;
+   return !(~x + 2);
 }
