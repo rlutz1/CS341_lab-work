@@ -218,7 +218,7 @@ unsigned float_abs(unsigned uf) {
    int NaNMask = 0xFF << 24;
    int ufChopped = uf << 1;
 
-   if ((ufChopped & NaNMask) == NaNMask && (ufChopped & (~NaNMask)) != 0) {
+   if ((ufChopped & NaNMask) == NaNMask && (ufChopped ^ NaNMask) != 0) {
       return uf;
    } // end if
 
