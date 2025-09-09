@@ -215,7 +215,15 @@ int evenBits(void) {
  *   Rating: 2
  */
 unsigned float_abs(unsigned uf) {
-  return 2;
+   int NaNMask = 0xFF << 24;
+   int ufChopped = uf << 1;
+
+   if ((ufChopped & NaNMask) == NaNMask && (ufChopped & (~NaNMask)) != 0) {
+      return uf;
+   } // end if
+
+   return uf & (~(0x80 << 24));
+
 }
 /* 
  * isTmin - returns 1 if x is the minimum, two's complement number,
@@ -245,5 +253,24 @@ int isTmin(int x) {
    // printf("%x\n", x);
 
    // return !x;
-   return !(~x + 2);
+   // printf("%x\n", (~1));
+   // printf("%x\n", (~x));
+   // printf("%x\n", ((~1) ^ (~x)));
+   // printf("%x\n", ((~1) ^ (~x)) + 1);
+   // printf("%x\n", !(((~1) ^ (~x))+ 1));
+   // return  !(((~1) ^ (~x)) + 1);
+
+   //okay another go:
+   // say x = 1000 (max)
+   // add 1: 1001
+   // ~: 0110
+   // ~1 xor 0110: 1110 xor 0110 = 1000
+   // then, ! (insert ^ x)
+   // int plusOne = x + 1; // add one
+   // int notPlusOne = ~plusOne; // not, if max, must be 0110
+   // int max = (~1) ^ notPlusOne;
+   // return !(max ^ x);
+
+   int boolNotX = !x; // set to 1 if zero, 0 if non zero
+   int oneOrTwo = boolNotX + 1; // 2 if zero, 1 otherwise
 }
