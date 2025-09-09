@@ -235,6 +235,9 @@ unsigned float_abs(unsigned uf) {
  *   Rating: 1
  */
 int isTmin(int x) {
+   int temp = (!x) + x;
+   return !(temp + temp);
+
    // printf("x: %x\n", x);
    //  printf("&: %x\n", (0x80000000 & x));
    // printf("&: %x\n", (0x7FFFFFFF ^ x));
@@ -273,6 +276,6 @@ int isTmin(int x) {
    // int max = (~1) ^ notPlusOne;
    // return !(max ^ x);
 
-   int boolNotX = !x; // set to 1 if zero, 0 if non zero
-   int oneOrTwo = boolNotX + 1; // 2 if zero, 1 otherwise
+   // int boolNotX = !x; // set to 1 if zero, 0 if non zero
+   // int oneOrTwo = boolNotX + 1; // 2 if zero, 1 otherwise
 }
