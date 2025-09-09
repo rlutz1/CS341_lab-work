@@ -195,12 +195,12 @@ int copyLSB(int x) {
  *   Rating: 1
  */
 int evenBits(void) {
-   int cheat = 0x55;
-   int acc = cheat;
-   acc = (acc << 8) + cheat;
-   acc = (acc << 8) + cheat;
-   acc = (acc << 8) + cheat;
-   acc = (acc << 8) + cheat;
+   int cheat = 0x55; // 01010101 initialized
+   int acc = cheat; // set accumulator to above
+   acc = (acc << 8) + cheat; // 0101010101010101
+   acc = (acc << 8) + cheat; // 010101010101010101010101
+   acc = (acc << 8) + cheat; // 01010101...01010101
+   acc = (acc << 8) + cheat; // 01010101.......01010101
    return acc;
 }
 /* 
@@ -215,13 +215,15 @@ int evenBits(void) {
  *   Rating: 2
  */
 unsigned float_abs(unsigned uf) {
-   int NaNMask = 0xFF << 24;
-   int ufChopped = uf << 1;
+   int NaNMask = 0xFF << 24; // 111111110000...0000
+   int ufChopped = uf << 1; // "float" with sign bit removed
 
+   // if (1) all 1's in esp and (2) non-zero frac
    if ((ufChopped & NaNMask) == NaNMask && (ufChopped ^ NaNMask) != 0) {
-      return uf;
+      return uf; // NaN found, return unaltered
    } // end if
 
+   // return "float" except for sign bit set to 0
    return uf & (~(0x80 << 24));
 
 }
