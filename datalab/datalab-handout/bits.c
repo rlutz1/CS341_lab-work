@@ -253,11 +253,10 @@ int isTmin(int x) {
     * @author Roxanne Lutz
     * 
     * the method works with the following logic.
-    * in 2's compliment arithmetic, only 2 numbers have the property below:
+    * in 2's compliment arithmetic, only Tmin and 0 have the property below:
     * (num + 1) + (num - 1) = 0 
-    * those 2 numbers are Tmin and 0.
-    * to consistently ignore 0, we can simply !x -> 0 turns to one, all else to 0.
-    * then add x such that 0 -> 1, all other x -> x.
+    * to consistently ignore 0, we can simply !x; 0 turns to one, all else to 0.
+    * then add x to (!x) such that 1 + 0 -> 1, 0 + all other x -> x.
     * we cannot subtract, so we have to add the binary rep of -1, ~0.
     * then, if (x - 1) + (x + 1) == 0 in only the Tmin case, we can 
     * return !(0) for 1 (Tmin), !(any other number) for 0 (not Tmin).
