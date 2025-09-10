@@ -275,10 +275,4 @@ int isTmin(int x) {
    int plusOne = num + 1;
    int minusOne = num + (~0);
    return !(plusOne + minusOne);
-
-    // approach below also passes with same number of ops
-   // int num = (!x) + x; // take care of the 0 case by always altering it to 1
-   // int negOne = ~0; // use 1111..1 to get num get num - 1
-   // int numMinusOne = (num + negOne); // subtract 1 from num
-   // return !((numMinusOne + num) ^ negOne); // see above for logic on this
 }
