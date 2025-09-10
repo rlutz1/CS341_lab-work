@@ -15,13 +15,6 @@
  * case it's OK.  
  */
 
- /*
-  * NOTES FOR ROXANNE: 
-  * + only edit this file
-  * + can only use: ! ̃  & ˆ | + << >> (unless otherwise stated)
-  * + no constants longer than 8 bits
-  */
-
 #if 0
 /*
  * Instructions to Students:
@@ -183,9 +176,13 @@ NOTES:
  *   Rating: 2
  */
 int copyLSB(int x) {
-   // (1) and x with 0001 to carve out the LSBit. returns either 0001 or 0000
-   // (2) not, creating either 1110 or 1111
-   // (3) + 1, returning either 1111 or 0000
+   /*
+    * @author Roxanne Lutz
+    * implementation works as follows:
+    * (1) and x with 0001 to carve out the LSBit. returns either 0001 or 0000
+    * (2) not, creating either 1110 or 1111
+    * (3) + 1, returning either 1111 or 0000
+    */ 
   return ~(x & 1) + 1;
 }
 /* 
@@ -195,6 +192,12 @@ int copyLSB(int x) {
  *   Rating: 1
  */
 int evenBits(void) {
+   /*
+    * @author Roxanne Lutz
+    * process is pretty brute-forcy. essentially: 
+    * (1) init an 8 bit 01010101 to set the pattern
+    * (2) shove it over 8 bits 4 times until the 32 bits reflect pattern
+    */
    int cheat = 0x55; // 01010101 initialized
    int acc = cheat; // set accumulator to above
    acc = (acc << 8) + cheat; // 0101010101010101
@@ -215,8 +218,20 @@ int evenBits(void) {
  *   Rating: 2
  */
 unsigned float_abs(unsigned uf) {
+   /*
+    * @author Roxanne Lutz
+    * The main test is for a NaN which can be identified by
+    * (1) all 1's in exp (bits 1 -> 9, left to right)
+    * (2) non-zero value in the frac (10 -> 31, left to right)
+    * note that we don't really care about the sign bit for this test.
+    * 
+    * so, approach is:
+    * (1) test if uf is NaN with a mask
+    * (2) if NaN, return immediately
+    * (3) if not, turn the sign bit to 0 (& with 01111...1)
+    */
    int NaNMask = 0xFF << 24; // 111111110000...0000
-   int ufChopped = uf << 1; // "float" with sign bit removed
+   int ufChopped = uf << 1; // "float" with sign bit removed for ease
 
    // if (1) all 1's in esp and (2) non-zero frac
    if ((ufChopped & NaNMask) == NaNMask && (ufChopped ^ NaNMask) != 0) {
@@ -225,7 +240,6 @@ unsigned float_abs(unsigned uf) {
 
    // return "float" except for sign bit set to 0
    return uf & (~(0x80 << 24));
-
 }
 /* 
  * isTmin - returns 1 if x is the minimum, two's complement number,
@@ -235,58 +249,36 @@ unsigned float_abs(unsigned uf) {
  *   Rating: 1
  */
 int isTmin(int x) {
-   int temp = (!x) + x;
-   // int temp2 = temp + temp + 1;
-   int temp2 = !(((temp + (~0)) + temp) ^ (~0)); // omfg this finally works
-   // cant just temp + temp because c does some fucky shit where that's 
-   // not actually 0 due to unpredictability about 
-   // if (temp2 == 0) {
-   //    printf("what the fuck\n");
-   // }
-   // printf("%x\n", temp);
-   // printf("%x\n", temp + temp + 1);
-   // printf("%x\n", temp2);
-   // printf("%x\n", !0);
-   return temp2;
+   /*
+    * @author Roxanne Lutz
+    * 
+    * the method works with the following logic.
+    * in 2's compliment arithmetic, only 2 numbers have the property below:
+    * (num + 1) + (num - 1) = 0 
+    * those 2 numbers are Tmin and 0.
+    * to consistently ignore 0, we can simply !x -> 0 turns to one, all else to 0.
+    * then add x such that 0 -> 1, all other x -> x.
+    * we cannot subtract, so we have to add the binary rep of -1, ~0.
+    * then, if (x - 1) + (x + 1) == 0 in only the Tmin case, we can 
+    * return !(0) for 1 (Tmin), !(any other number) for 0 (not Tmin).
+    * 
+    * NOTE:
+    * this method began with the attempt:
+    * int num = (!x) + x; return !(num + num);
+    * since (consider 4 bit int) 1000 + 1000 == 0000 due to truncation.
+    * but, it seems that C has some unpredictable behavior with this overflow.
+    * although printing that value was 0, the result was treated as nonzero,
+    * so it returns instead 0 in the Tmin case. hence, the change to using boundary points.
+    */
 
-   // printf("x: %x\n", x);
-   //  printf("&: %x\n", (0x80000000 & x));
-   // printf("&: %x\n", (0x7FFFFFFF ^ x));
-//   if ((0x7FFFFFFF ^ x) == 0xFFFFFFFF) {
-//       return 1;
-//   }
-//   return 0;
-   // return !((0x80 << 24) ^ x); // SO ANNOYING THAT THIS WORKS
-   
-   // bad attempt
-   // int acc = 0xFF;
+   int num = (!x) + x;
+   int plusOne = num + 1;
+   int minusOne = num + (~0);
+   return !(plusOne + minusOne);
 
-   // x += acc;
-   // x += acc;
-   // x += acc;
-   // x += acc;
-   // x += 1;
-   // printf("%x\n", x);
-
-   // return !x;
-   // printf("%x\n", (~1));
-   // printf("%x\n", (~x));
-   // printf("%x\n", ((~1) ^ (~x)));
-   // printf("%x\n", ((~1) ^ (~x)) + 1);
-   // printf("%x\n", !(((~1) ^ (~x))+ 1));
-   // return  !(((~1) ^ (~x)) + 1);
-
-   //okay another go:
-   // say x = 1000 (max)
-   // add 1: 1001
-   // ~: 0110
-   // ~1 xor 0110: 1110 xor 0110 = 1000
-   // then, ! (insert ^ x)
-   // int plusOne = x + 1; // add one
-   // int notPlusOne = ~plusOne; // not, if max, must be 0110
-   // int max = (~1) ^ notPlusOne;
-   // return !(max ^ x);
-
-   // int boolNotX = !x; // set to 1 if zero, 0 if non zero
-   // int oneOrTwo = boolNotX + 1; // 2 if zero, 1 otherwise
+    // approach below also passes with same number of ops
+   // int num = (!x) + x; // take care of the 0 case by always altering it to 1
+   // int negOne = ~0; // use 1111..1 to get num get num - 1
+   // int numMinusOne = (num + negOne); // subtract 1 from num
+   // return !((numMinusOne + num) ^ negOne); // see above for logic on this
 }
