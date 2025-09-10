@@ -236,7 +236,18 @@ unsigned float_abs(unsigned uf) {
  */
 int isTmin(int x) {
    int temp = (!x) + x;
-   return !(temp + temp);
+   // int temp2 = temp + temp + 1;
+   int temp2 = !(((temp + (~0)) + temp) ^ (~0)); // omfg this finally works
+   // cant just temp + temp because c does some fucky shit where that's 
+   // not actually 0 due to unpredictability about 
+   // if (temp2 == 0) {
+   //    printf("what the fuck\n");
+   // }
+   // printf("%x\n", temp);
+   // printf("%x\n", temp + temp + 1);
+   // printf("%x\n", temp2);
+   // printf("%x\n", !0);
+   return temp2;
 
    // printf("x: %x\n", x);
    //  printf("&: %x\n", (0x80000000 & x));
