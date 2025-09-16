@@ -314,23 +314,11 @@ int trueThreeFourths(int x)
   int lastTwoBits = x & 0x3; // grab the last two bits of any number
   int flipOne = !lastTwoBits; // 00 -> 1, all else -> 0
   int flipTwo = !flipOne; // // (00) 1 -> 0, (all else) 0 -> 1
+  
   // 1 & pos (1) -> 1
   // 0 & pos (1) -> 0
   // 1, 0 & neg (0) -> 0
-  // finally, make negative 1 as needed or remain zero
-  int posAdjust = ~(flipTwo & zeroNegOnePos) + 1; 
-
-  // printf("%x\n", intMax);
-  // int adjustment = (((x & intMax) >> 31) & x) & 0x3;
-
+  int posAdjust = ~(flipTwo & zeroNegOnePos) + 1; // finally, make negative 1 as needed or remain zero
   int adjustment = lastTwoBits + posAdjust; // subtract 1 from last two bits as needed
-  // printf("%x\n", adjustment);
-  return divByFour + divByFour + divByFour + adjustment;
-  // if (x >= 0) {
-  //   return (x >> 1) + (x >> 2) + 1;
-  // }
-  // int posX = (~x) + 1;
-  // int timesThreeFourths = (posX >> 1) + (posX >> 2);
-  // return ~(timesThreeFourths) + 1;
-  
+  return divByFour + divByFour + divByFour + adjustment; // get three fourths with needed adjustment for rounding
 }
