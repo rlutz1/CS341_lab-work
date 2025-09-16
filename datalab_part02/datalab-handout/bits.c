@@ -308,5 +308,29 @@ int trueFiveEighths(int x)
  */
 int trueThreeFourths(int x)
 {
-  return 2;
+  int divByFour = x >> 2; // x * (1/(2^2))
+  int intMax = 0x1 << 31; // int max: 1000..00
+  int zeroNegOnePos = !(x & intMax); // returns 1 for positive nums, 0 for negs
+  int lastTwoBits = x & 0x3; // grab the last two bits of any number
+  int flipOne = !lastTwoBits; // 00 -> 1, all else -> 0
+  int flipTwo = !flipOne; // // (00) 1 -> 0, (all else) 0 -> 1
+  // 1 & pos (1) -> 1
+  // 0 & pos (1) -> 0
+  // 1, 0 & neg (0) -> 0
+  // finally, make negative 1 as needed or remain zero
+  int posAdjust = ~(flipTwo & zeroNegOnePos) + 1; 
+
+  // printf("%x\n", intMax);
+  // int adjustment = (((x & intMax) >> 31) & x) & 0x3;
+
+  int adjustment = lastTwoBits + posAdjust; // subtract 1 from last two bits as needed
+  // printf("%x\n", adjustment);
+  return divByFour + divByFour + divByFour + adjustment;
+  // if (x >= 0) {
+  //   return (x >> 1) + (x >> 2) + 1;
+  // }
+  // int posX = (~x) + 1;
+  // int timesThreeFourths = (posX >> 1) + (posX >> 2);
+  // return ~(timesThreeFourths) + 1;
+  
 }
