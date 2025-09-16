@@ -178,7 +178,20 @@ NOTES:
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int shoveBits = x >> (n - 1);
+  // printf("shove bits: %x\n", shoveBits);
+  int oneMoreShove = shoveBits >> 1; // something about this is wonky
+  // printf("one more shove bits: %x\n", oneMoreShove);
+  // printf("returning (0 for nope): %x\n", !(shoveBits ^ oneMoreShove));
+  return !(shoveBits ^ oneMoreShove);
+  // return 2;
+  // int intMax = 0x1 << 31; // int max: 1000..00
+  // int bitMask = ~(intMax >> (31 - n)); // failure, sloppy try
+
+  // int lastNBits = x & bitMask;
+  // int shove1 = lastNBits << 32 - n;
+  // int shove2 = shove1 >> 32 - n;
+  // return !(x ^ shove2); 
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
