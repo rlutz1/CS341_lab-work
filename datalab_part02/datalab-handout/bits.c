@@ -239,6 +239,9 @@ int howManyBits(int x) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 50
  *   Rating: 4
+ * 
+ * TODO: better more efficient way to test for all ones?
+ * TODO: rid of the double >>, just hard code the numbers like a naughty girl.
  */
 int leftBitCount(int x) {
   int last = x;
