@@ -242,19 +242,22 @@ int howManyBits(int x) {
  */
 int leftBitCount(int x) {
   int last = x;
+  int shift = x;
+
   int streak = 0;
-  int allOnes = ~0;
-  int shift;
-  int isAllOnes; // 1 for yes, 0 for no when xor'd with a number
+  int allOnes = ~0; // for testing
+  
+  int isAllOnes = 0; // 1 for yes, 0 for no when xor'd with a number
   int halfBits = 16;
   int currNum = 16;
+ // can i make is all 1's 11111 if ture, 0 if false?
 
   // 16
   shift = x >> currNum; // shift by current number
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << 4)); // add num ONLY if all ones test returns as 1
-  streak = streak + (isAllOnes << 4);
-  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  streak = streak + (isAllOnes << 4); // add 16 to streak if shift is all ones
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1)); // if shift is nonzero, update last to that, otherwise, keep last
 
   // 8
   currNum = 8;
