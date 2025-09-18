@@ -321,6 +321,7 @@ int howManyBits(int x) {
  * TODO: better more efficient way to test for all ones?
  * TODO: rid of the double >>, just hard code the numbers like a naughty girl.
  * down to 56 :)
+ * TODO: apparently dlc doesn't like not putting int in front of every declaration of vars, lol, just shove it in.
  */
 int leftBitCount(int x) {
   int last = x;
