@@ -179,9 +179,9 @@ NOTES:
  */
 int fitsBits(int x, int n) { 
   // APPROACH 1:
-  int shoveBits = x >> (n - 1);
-  // int oneMoreShove = shoveBits >> 1; // potential 
-  // return !(shoveBits ^ oneMoreShove);
+  int shoveBits = x >> (n + (~0));
+  int oneMoreShove = shoveBits >> 1; // potential issue with >> word size?
+  return !(shoveBits ^ oneMoreShove);
 
   // printing for debug
   // printf("shove bits: %x\n", shoveBits);
@@ -191,30 +191,20 @@ int fitsBits(int x, int n) {
   
   // APPROACH 2 (ILLEGAL): 
   // still fails on 0? but gets past the int min case
-  // if (shoveBits == 0 || shoveBits == -1 ) {
-  if (!(shoveBits & 0xFFFFFFFF)) { // shoveBits is 0000...0000S
-    // printf("1\n");
-    return 1;
-  }
+  // if (shoveBits == 0 || shoveBits == -1 ) { // or this, but extra illegal
+  // if (!(shoveBits & 0xFFFFFFFF)) { // shoveBits is 0000...0000S
+  //   // printf("1\n");
+  //   return 1;
+  // }
 
-  if (!((~shoveBits) & 0xFFFFFFFF)) {
-     // shoveBits is 1111...1111
-    // printf("1\n");
-    return 1;
-  }
+  // if (!((~shoveBits) & 0xFFFFFFFF)) {
+  //    // shoveBits is 1111...1111
+  //   // printf("1\n");
+  //   return 1;
+  // }
 
-  // printf("0\n");
-  return 0;
- 
- 
-  // return 2;
-  // int intMax = 0x1 << 31; // int max: 1000..00
-  // int bitMask = ~(intMax >> (31 - n)); // failure, sloppy try
-
-  // int lastNBits = x & bitMask;
-  // int shove1 = lastNBits << 32 - n;
-  // int shove2 = shove1 >> 32 - n;
-  // return !(x ^ shove2); 
+  // // printf("0\n");
+  // return 0;
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -251,7 +241,60 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 int leftBitCount(int x) {
-  return 2;
+  int last = x;
+  int streak = 0;
+  int allOnes = ~0;
+  int shift;
+  int isAllOnes; // 1 for yes, 0 for no when xor'd with a number
+  int halfBits = 16;
+  int currNum = halfBits;
+
+  // 16
+  shift = x >> currNum; // shift by current number
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // 8
+  currNum = 8;
+  shift = last << halfBits;
+  shift = last >> currNum;
+  shift = last >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  
+  // 4
+  currNum = 4;
+  shift = last << halfBits;
+  shift = last >> currNum;
+  shift = last >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // 2 
+  currNum = 2;
+  shift = last << halfBits;
+  shift = last >> currNum;
+  shift = last >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // 1
+  currNum = 1;
+  shift = last << halfBits;
+  shift = last >> currNum;
+  shift = last >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // edge case: if original all ones, add 1 to streak
+  streak = streak + !(x ^ allOnes);
+
+  return streak;
 }
 /*
  * satAdd - adds two numbers but when positive overflow occurs, returns
