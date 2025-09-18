@@ -215,7 +215,85 @@ int fitsBits(int x, int n) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+
+  x = ~x;
+
+  // -------------------------------
+  int last = x;
+  int shift = x;
+
+  int streak = 0;
+  int allOnes = ~0; // for testing
+  int flipflop = allOnes;
+  
+  int isAllOnes = 0; // 1 for yes, 0 for no when xor'd with a number
+  int halfBits = 16;
+  int currNum = 16;
+ // can i make is all 1's 11111 if ture, 0 if false?
+
+  // 16
+  shift = x >> currNum; // shift by current number
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  // streak = streak + (currNum & (isAllOnes << 4)); // add num ONLY if all ones test returns as 1
+  streak = streak + (isAllOnes << 4); // add 16 to streak if shift is all ones
+  flipflop = allOnes + isAllOnes;
+  last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1)); // if shift is nonzero, update last to that, otherwise, keep last
+
+  // 8
+  currNum = 8;
+  shift = last << halfBits;
+  shift = shift >> currNum;
+  shift = shift >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  streak = streak + (isAllOnes << 3);
+  flipflop = allOnes + isAllOnes;
+  last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  
+  // 4
+  currNum = 4;
+  shift = last << halfBits;
+  shift = shift >> currNum;
+  shift = shift >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  streak = streak + (isAllOnes << 2);
+  flipflop = allOnes + isAllOnes;
+  last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // 2 
+  currNum = 2;
+  shift = last << halfBits;
+  shift = shift >> currNum;
+  shift = shift >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  streak = streak + (isAllOnes << 1);
+  flipflop = allOnes + isAllOnes;
+  last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // 1
+  currNum = 1;
+  shift = last << halfBits;
+  shift = shift >> currNum;
+  shift = shift >> halfBits;
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
+  streak = streak + isAllOnes;
+  flipflop = allOnes + isAllOnes;
+  last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+
+  // edge case: if original all ones, add 1 to streak
+  streak = streak + !(x ^ allOnes);
+  // -------------------------------
+
+  return 0x1 << (31 - streak); // soooooo close
+
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
