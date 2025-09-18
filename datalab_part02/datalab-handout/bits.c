@@ -320,34 +320,35 @@ int howManyBits(int x) {
  * 
  * TODO: better more efficient way to test for all ones?
  * TODO: rid of the double >>, just hard code the numbers like a naughty girl.
+ * down to 56 :)
  */
 int leftBitCount(int x) {
   int last = x;
   int shift = x;
 
-  int streak = 0;
   int allOnes = ~0; // for testing
-  int flipflop = allOnes;
-  
+  int flipflop = 0; // logical flipping between last and new shift as needed
+
+  int streak = !(x ^ allOnes); // starts at 1 if all ones, starts at 0 if not
   int isAllOnes = 0; // 1 for yes, 0 for no when xor'd with a number
   int halfBits = 16;
   int currNum = 16;
- // can i make is all 1's 11111 if ture, 0 if false?
+
 
   // 16
   shift = x >> currNum; // shift by current number
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << 4)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 4); // add 16 to streak if shift is all ones
-  flipflop = allOnes + isAllOnes;
-  last = (last & (~flipflop)) + (shift & flipflop);
+  flipflop = allOnes + isAllOnes; // 1111 + 1 = 0, 1111 + 0 = 1111
+  last = (last & (~flipflop)) + (shift & flipflop); // keep last if the shift was not all ones, otherwise remain
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1)); // if shift is nonzero, update last to that, otherwise, keep last
 
   // 8
   currNum = 8;
   shift = last << halfBits;
-  shift = shift >> currNum;
-  shift = shift >> halfBits;
+  shift = shift >> 24; // 8 + 16 = 24
+  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 3);
@@ -358,8 +359,8 @@ int leftBitCount(int x) {
   // 4
   currNum = 4;
   shift = last << halfBits;
-  shift = shift >> currNum;
-  shift = shift >> halfBits;
+  shift = shift >> 20; // 4 + 16 = 20
+  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 2);
@@ -370,8 +371,8 @@ int leftBitCount(int x) {
   // 2 
   currNum = 2;
   shift = last << halfBits;
-  shift = shift >> currNum;
-  shift = shift >> halfBits;
+  shift = shift >> 18; // 2 + 16 = 18
+  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 1);
@@ -382,17 +383,14 @@ int leftBitCount(int x) {
   // 1
   currNum = 1;
   shift = last << halfBits;
-  shift = shift >> currNum;
-  shift = shift >> halfBits;
+  shift = shift >> 17; // 1 + 16 = 17
+  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + isAllOnes;
   flipflop = allOnes + isAllOnes;
   last = (last & (~flipflop)) + (shift & flipflop);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
-
-  // edge case: if original all ones, add 1 to streak
-  streak = streak + !(x ^ allOnes);
 
   return streak;
 }
