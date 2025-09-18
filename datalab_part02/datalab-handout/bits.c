@@ -177,18 +177,33 @@ NOTES:
  *   Max ops: 15
  *   Rating: 2
  */
-int fitsBits(int x, int n) {
+int fitsBits(int x, int n) { 
+  // APPROACH 1:
   int shoveBits = x >> (n - 1);
-  printf("shove bits: %x\n", shoveBits);
-  // int oneMoreShove = shoveBits >> 1; // something about this is wonky
+  // int oneMoreShove = shoveBits >> 1; // potential 
+  // return !(shoveBits ^ oneMoreShove);
+
+  // printing for debug
+  // printf("shove bits: %x\n", shoveBits);
   // printf("one more shove bits: %x\n", oneMoreShove);
   // printf("returning (0 for nope): %x\n", !(shoveBits ^ oneMoreShove));
-  // return !(shoveBits ^ oneMoreShove);
-  // ILLEGAL: 
+  
+  
+  // APPROACH 2 (ILLEGAL): 
   // still fails on 0? but gets past the int min case
-  if (x == 0 || x == -1 ) {
+  // if (shoveBits == 0 || shoveBits == -1 ) {
+  if (!(shoveBits & 0xFFFFFFFF)) { // shoveBits is 0000...0000S
+    // printf("1\n");
     return 1;
   }
+
+  if (!((~shoveBits) & 0xFFFFFFFF)) {
+     // shoveBits is 1111...1111
+    // printf("1\n");
+    return 1;
+  }
+
+  // printf("0\n");
   return 0;
  
  
