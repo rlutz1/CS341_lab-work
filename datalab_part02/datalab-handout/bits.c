@@ -240,8 +240,6 @@ int howManyBits(int x) {
   int notSpreadLMB = ~spreadLMB;
   int flipOnlyPositives = x ^ notSpreadLMB;
   int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code! works with a copy paste but don't want that here until finalized.
-  
-  // return 33 + ((~streak) + 1);
    return 34 + (~streak);
 }
 /*
