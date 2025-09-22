@@ -242,7 +242,7 @@ int greatestBitPos(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+  return 0; //
 }
 /*
  * leftBitCount - returns count of number of consective 1's in
