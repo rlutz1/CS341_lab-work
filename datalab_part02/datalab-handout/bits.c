@@ -270,11 +270,12 @@ int leftBitCount(int x) {
 
   // 16
   shift = x >> currNum; // shift by current number
-  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not // TODO: isAllOnes = !(shift + 1); // 1 if all ones, 0 if not if we can rid of allOnes
   // streak = streak + (currNum & (isAllOnes << 4)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 4); // add 16 to streak if shift is all ones
-  flipflop = allOnes + isAllOnes; // 1111 + 1 = 0, 1111 + 0 = 1111
-  last = (last & (~flipflop)) + (shift & flipflop); // keep last if the shift was not all ones, otherwise remain
+  // flipflop = allOnes + isAllOnes; // 1111 + 1 = 0, 1111 + 0 = 1111
+  // last = (last & (~flipflop)) + (shift & flipflop); // keep last if the shift was not all ones, otherwise remain
+  last = (last & shift) | (shift + isAllOnes);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1)); // if shift is nonzero, update last to that, otherwise, keep last
 
   // 8
@@ -285,8 +286,9 @@ int leftBitCount(int x) {
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 3);
-  flipflop = allOnes + isAllOnes;
-  last = (last & (~flipflop)) + (shift & flipflop);
+  // flipflop = allOnes + isAllOnes;
+  // last = (last & (~flipflop)) + (shift & flipflop);
+  last = (last & shift) | (shift + isAllOnes);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
   
   // 4
@@ -297,8 +299,9 @@ int leftBitCount(int x) {
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 2);
-  flipflop = allOnes + isAllOnes;
-  last = (last & (~flipflop)) + (shift & flipflop);
+  // flipflop = allOnes + isAllOnes;
+  // last = (last & (~flipflop)) + (shift & flipflop);
+  last = (last & shift) | (shift + isAllOnes);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
 
   // 2 
@@ -309,8 +312,9 @@ int leftBitCount(int x) {
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + (isAllOnes << 1);
-  flipflop = allOnes + isAllOnes;
-  last = (last & (~flipflop)) + (shift & flipflop);
+  // flipflop = allOnes + isAllOnes;
+  // last = (last & (~flipflop)) + (shift & flipflop);
+  last = (last & shift) | (shift + isAllOnes);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
 
   // 1
@@ -321,8 +325,9 @@ int leftBitCount(int x) {
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
   // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
   streak = streak + isAllOnes;
-  flipflop = allOnes + isAllOnes;
-  last = (last & (~flipflop)) + (shift & flipflop);
+  // flipflop = allOnes + isAllOnes;
+  // last = (last & (~flipflop)) + (shift & flipflop);
+  // last = (last & shift) | (shift + isAllOnes);
   // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
 
   return streak;
