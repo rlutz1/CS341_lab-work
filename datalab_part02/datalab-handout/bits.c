@@ -215,6 +215,7 @@ int fitsBits(int x, int n) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+  int shove = 0; // initializing this up here because dlc liked to complain :)
   int xZeroCleared = x + (!x); // clear out the zero edge case
   int notX = ~xZeroCleared; // not x
 
@@ -264,8 +265,8 @@ int greatestBitPos(int x) {
 
   // end left bit count
   
-  int shoveOne = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak, fixing the 0 edge case
-  return shoveOne & x; // keep the shoved one for every number except for zero. 
+  shove = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak, fixing the 0 edge case
+  return shove & x; // keep the shoved one for every number except for zero. 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
@@ -341,11 +342,6 @@ int howManyBits(int x) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 50
  *   Rating: 4
- * 
- * TODO: better more efficient way to test for all ones?
- * TODO: rid of the double >>, just hard code the numbers like a naughty girl.
- * down to 56 :)
- * TODO: apparently dlc doesn't like not putting int in front of every declaration of vars, lol, just shove it in.
  */
 int leftBitCount(int x) {
   // initialize last and shift as x for now
