@@ -221,12 +221,51 @@ int greatestBitPos(int x) {
   // perform left bit count on our flipped number, code is copied and modified from leftBitCount function body.
   // below is equivalent of: int streak = leftBitCount(notX);
 
-  int streak = leftBitCount(notX); // TODO: replace with lbc code! works with a copy paste but don't want that here until finalized.
+  // initialize last and shift as x for now
+  int last = notX;
+  int shift = notX;
+
+  int allOnes = ~0; // for testing
+  int isAllOnes = 0; // will be 1 for yes, 0 for no when xor'd with a number
+  int streak = !(notX ^ allOnes); // starts at 1 if all ones, starts at 0 if not
+
+  // 16
+  shift = notX >> 16; // shift initially by 32 / 2 = 16 bits
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (isAllOnes << 4); // add 16 if all ones (found 16 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number 
+
+  // 8
+  shift = last << 16; // reset the num
+  shift = shift >> 24; // 8 + 16 = 24
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (isAllOnes << 3); // add 8 if all ones (found 8 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
+  
+  // 4
+  shift = last << 16; // reset the num
+  shift = shift >> 20; // 4 + 16 = 20
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (isAllOnes << 2); // add 4 if all ones (found 4 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
+
+  // 2 
+  shift = last << 16; // reset the num
+  shift = shift >> 18; // 2 + 16 = 18
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (isAllOnes << 1); // add 2 if all ones (found 2 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
+
+  // 1
+  shift = last << 16; // reset the num
+  shift = shift >> 17; // 1 + 16 = 17
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + isAllOnes; // add 1 or 0 depending on all ones or not
 
   // end left bit count
   
   int shoveOne = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak, fixing the 0 edge case
-  return shoveOne & (x); // keep the shoved one for every number except for zero. 
+  return shoveOne & x; // keep the shoved one for every number except for zero. 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
  *             two's complement
