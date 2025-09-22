@@ -215,19 +215,10 @@ int fitsBits(int x, int n) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-
-  // Test the following:
   int xZeroCleared = x + (!x); // clear out the zero edge case
   int notX = ~xZeroCleared; // not x
-  // x = ~x;
-
-  // proceed with streak count operation
-  // -------------------------------
-  // TODO, copy that logic here, but to remain up to date, calling function for now
-  int streak = leftBitCount(notX);
-  // shove over 1 as far as 31 - streak, fixing the 0 edge case
-  // int shoveOne = 0x1 << (31 + ((~streak) + 1));
-  int shoveOne = 0x1 << (32 + (~streak));
+  int streak = leftBitCount(notX); // TODO: replace with lbc code! works with a copy paste but don't want that here until finalized.
+  int shoveOne = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak, fixing the 0 edge case
   return shoveOne & (x); // keep the shoved one for every number except for zero. 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -248,7 +239,8 @@ int howManyBits(int x) {
   int spreadLMB = leftMostBit >> 31;
   int notSpreadLMB = ~spreadLMB;
   int flipOnlyPositives = x ^ notSpreadLMB;
-  int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code!
+  int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code! works with a copy paste but don't want that here until finalized.
+  
   // return 33 + ((~streak) + 1);
    return 34 + (~streak);
 }
