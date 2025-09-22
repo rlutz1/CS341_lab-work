@@ -216,8 +216,12 @@ int fitsBits(int x, int n) {
  */
 int greatestBitPos(int x) {
 
-  x = ~x;
+  // Test the following:
+  x = x + (!x); // clear out the zero edge case
+  x = ~x; // not x
+  // x = ~x;
 
+  // proceed with streak count operation
   // -------------------------------
   int last = x;
   int shift = x;
@@ -292,7 +296,9 @@ int greatestBitPos(int x) {
   streak = streak + !(x ^ allOnes);
   // -------------------------------
 
-  return 0x1 << (31 - streak); // soooooo close
+  // shove over 1 as far as 31 - streak, fixing the 0 edge case
+  int shoveOne = 0x1 << (31 - streak);
+  return shoveOne & (~x); // keep the shoved one for every number except for zero. 
 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
