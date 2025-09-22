@@ -414,7 +414,12 @@ unsigned float_i2f(int x) {
  */
 int trueFiveEighths(int x)
 {
-    return 2;
+    int intMax = 0x1 << 31;
+    int extraRemainderAdjust = ((x & 0x4) >> 2) & (x & 0x1); // only add one if 1X1 pattern matches
+    int negAdjust = !(!(x & intMax)) & !(!(x & 0x7)); // adjust negative numbers by 1 unless divisible by 8
+    int divBy2 = x >> 1;
+    int divBy8 = x >> 3;
+    return divBy2 + divBy8 + extraRemainderAdjust + negAdjust;
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
