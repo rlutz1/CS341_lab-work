@@ -239,6 +239,10 @@ int howManyBits(int x) {
   int spreadLMB = leftMostBit >> 31;
   int notSpreadLMB = ~spreadLMB;
   int flipOnlyPositives = x ^ notSpreadLMB;
+
+  // preform left bit count on our flipped number
+
+
   int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code! works with a copy paste but don't want that here until finalized.
    return 34 + (~streak);
 }
@@ -256,79 +260,46 @@ int howManyBits(int x) {
  * TODO: apparently dlc doesn't like not putting int in front of every declaration of vars, lol, just shove it in.
  */
 int leftBitCount(int x) {
+  // initialize last and shift as x for now
   int last = x;
   int shift = x;
 
   int allOnes = ~0; // for testing
-  int flipflop = 0; // logical flipping between last and new shift as needed
-
+  int isAllOnes = 0; // will be 1 for yes, 0 for no when xor'd with a number
   int streak = !(x ^ allOnes); // starts at 1 if all ones, starts at 0 if not
-  int isAllOnes = 0; // 1 for yes, 0 for no when xor'd with a number
-  int halfBits = 16;
-  int currNum = 16;
-
 
   // 16
-  shift = x >> currNum; // shift by current number
-  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not // TODO: isAllOnes = !(shift + 1); // 1 if all ones, 0 if not if we can rid of allOnes
-  // streak = streak + (currNum & (isAllOnes << 4)); // add num ONLY if all ones test returns as 1
-  streak = streak + (isAllOnes << 4); // add 16 to streak if shift is all ones
-  // flipflop = allOnes + isAllOnes; // 1111 + 1 = 0, 1111 + 0 = 1111
-  // last = (last & (~flipflop)) + (shift & flipflop); // keep last if the shift was not all ones, otherwise remain
-  last = (last & shift) | (shift + isAllOnes);
-  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1)); // if shift is nonzero, update last to that, otherwise, keep last
+  shift = x >> 16; // shift initially by 32 / 2 = 16 bits
+  isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
+  streak = streak + (isAllOnes << 4); // add 16 if all ones (found 16 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number 
 
   // 8
-  currNum = 8;
-  shift = last << halfBits;
+  shift = last << 16; // reset the num
   shift = shift >> 24; // 8 + 16 = 24
-  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
-  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
-  streak = streak + (isAllOnes << 3);
-  // flipflop = allOnes + isAllOnes;
-  // last = (last & (~flipflop)) + (shift & flipflop);
-  last = (last & shift) | (shift + isAllOnes);
-  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  streak = streak + (isAllOnes << 3); // add 8 if all ones (found 8 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
   
   // 4
-  currNum = 4;
-  shift = last << halfBits;
+  shift = last << 16; // reset the num
   shift = shift >> 20; // 4 + 16 = 20
-  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
-  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
-  streak = streak + (isAllOnes << 2);
-  // flipflop = allOnes + isAllOnes;
-  // last = (last & (~flipflop)) + (shift & flipflop);
-  last = (last & shift) | (shift + isAllOnes);
-  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  streak = streak + (isAllOnes << 2); // add 4 if all ones (found 4 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
 
   // 2 
-  currNum = 2;
-  shift = last << halfBits;
+  shift = last << 16; // reset the num
   shift = shift >> 18; // 2 + 16 = 18
-  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
-  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
-  streak = streak + (isAllOnes << 1);
-  // flipflop = allOnes + isAllOnes;
-  // last = (last & (~flipflop)) + (shift & flipflop);
-  last = (last & shift) | (shift + isAllOnes);
-  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  streak = streak + (isAllOnes << 1); // add 2 if all ones (found 2 more ones)
+  last = (last & shift) | (shift + isAllOnes); // keep last as non zero number
 
   // 1
-  currNum = 1;
-  shift = last << halfBits;
+  shift = last << 16; // reset the num
   shift = shift >> 17; // 1 + 16 = 17
-  // shift = shift >> halfBits;
   isAllOnes = !(shift ^ allOnes); // 1 if all ones, 0 if not
-  // streak = streak + (currNum & (isAllOnes << currNum)); // add num ONLY if all ones test returns as 1
-  streak = streak + isAllOnes;
-  // flipflop = allOnes + isAllOnes;
-  // last = (last & (~flipflop)) + (shift & flipflop);
-  // last = (last & shift) | (shift + isAllOnes);
-  // last = (last & isAllOnes) + (shift & (~isAllOnes >> 1));
+  streak = streak + isAllOnes; // add 1 or 0 depending on all ones or not
 
   return streak;
 }
