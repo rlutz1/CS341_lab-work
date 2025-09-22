@@ -242,7 +242,13 @@ int greatestBitPos(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0; //
+  int intMax = 0x1 << 31;
+  int leftMostBit = x & intMax;
+  int spreadLMB = leftMostBit >> 31;
+  int notSpreadLMB = ~spreadLMB;
+  int flipOnlyPositives = x ^ notSpreadLMB;
+  int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code!
+  return 33 + ((~streak) + 1);
 }
 /*
  * leftBitCount - returns count of number of consective 1's in
