@@ -226,7 +226,8 @@ int greatestBitPos(int x) {
   // TODO, copy that logic here, but to remain up to date, calling function for now
   int streak = leftBitCount(notX);
   // shove over 1 as far as 31 - streak, fixing the 0 edge case
-  int shoveOne = 0x1 << (31 - streak);
+  // int shoveOne = 0x1 << (31 + ((~streak) + 1));
+  int shoveOne = 0x1 << (32 + (~streak));
   return shoveOne & (x); // keep the shoved one for every number except for zero. 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -248,7 +249,8 @@ int howManyBits(int x) {
   int notSpreadLMB = ~spreadLMB;
   int flipOnlyPositives = x ^ notSpreadLMB;
   int streak = leftBitCount(flipOnlyPositives); // TODO: replace with lbc code!
-  return 33 + ((~streak) + 1);
+  // return 33 + ((~streak) + 1);
+   return 34 + (~streak);
 }
 /*
  * leftBitCount - returns count of number of consective 1's in
