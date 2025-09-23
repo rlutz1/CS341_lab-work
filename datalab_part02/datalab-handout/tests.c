@@ -53,7 +53,7 @@ unsigned f2u(float f) {
    specifying compiler intent are available, use them to determine
    whether the overall intent is to support these features; otherwise,
    presume an older compiler has intent to support these features and
-   define these macros by default.  */
+   define these ma/cros by default.  */
 /* wchar_t uses Unicode 10.0.0.  Version 10.0 of the Unicode Standard is
    synchronized with ISO/IEC 10646:2017, fifth edition, plus
    the following additions from Amendment 1 to the fifth edition:
@@ -62,15 +62,45 @@ unsigned f2u(float f) {
    - 3 additional Zanabazar Square characters */
 int test_fitsBits(int x, int n)
 {
-  if (n == 32) {
-    int TMin_n = 0x1 << 31;
-    int TMax_n = ~TMin_n;
-    return x >= TMin_n && x <= TMax_n;
-  }
-  int TMin_n = -(1 << (n-1)); // what is that negative for? fail on 32 only
-  // int TMin_n = ~(1 << (n-1)) + 1; // try removing
-  int TMax_n = (1 << (n-1)) - 1;
-  return x >= TMin_n && x <= TMax_n;
+  // this appears to consistently work with given n in [1, 32]
+  int intMax = 0x1 << 31; // force arithemtic right
+  int TMin_n = intMax >> (32 - n);
+  int TMax_n = ~TMin_n;
+  return x >= TMin_n && x <= TMax_n; // comparisons consistently work
+
+  // int TMin_n = -(1 << (n-1));
+  // int TMax_n = (1 << (n-1)) - 1;
+  // // printf("n = %d, min %x, max %x\n", n, TMin_n, TMax_n);
+  // return x >= TMin_n && x <= TMax_n;
+
+  // below if works to isolate the edge case problem child
+  // with the original code
+
+  // if (n == 32) {
+  //   int TMin_n = 0x1 << 31;
+  //   int TMax_n = ~TMin_n;
+  //   return x >= TMin_n && x <= TMax_n;
+  // }
+
+  // something about this original code causes problems when making comparisons.
+  // CONSISTENT: if i have a print statement in the code body, 
+  // this test PASSES. if no print statement, this test FAILS.
+  // despite the fact that TMin_n1 == Tmin_n2 and Tmax_n1 == Tmax_n2 for all cases. none seem to catch.
+  // int TMin_n2 = -(1 << (n-1)); 
+  // int TMax_n2 = (1 << (n-1)) - 1;
+
+  // if (TMin_n != TMin_n2) 
+  //   printf("!!!!!!!!tmins didn't match for n = %d: %x, %x\n", n, TMin_n, TMin_n2);
+
+  // if (TMax_n != TMax_n2) 
+  //   printf("!!!!!!!!tmaxs didn't match for n = %d: %x, %x\n", n, TMax_n, TMax_n2);
+
+  // return x >= TMin_n2 && x <= TMax_n2; // comparisons consistently work
+  // printing for debugging
+  // printf("n = %d, min %x, max %x\n", n, TMin_n2, TMax_n2); // printing specifically _n2 values will fix the bug
+  // int test = 0;
+
+  
 }
 int test_greatestBitPos(int x) {
     unsigned mask = 1<<31;

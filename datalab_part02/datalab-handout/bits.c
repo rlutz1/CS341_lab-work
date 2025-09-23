@@ -181,6 +181,7 @@ int fitsBits(int x, int n) {
   // APPROACH 1:
   int shoveBits = x >> (n + (~0));
   int oneMoreShove = shoveBits >> 1; // potential issue with >> word size?
+  // printf("%d\n", !(shoveBits ^ oneMoreShove));
   return !(shoveBits ^ oneMoreShove);
 
   // printing for debug
