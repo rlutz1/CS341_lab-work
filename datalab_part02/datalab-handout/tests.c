@@ -62,7 +62,13 @@ unsigned f2u(float f) {
    - 3 additional Zanabazar Square characters */
 int test_fitsBits(int x, int n)
 {
-  int TMin_n = -(1 << (n-1));
+  if (n == 32) {
+    int TMin_n = 0x1 << 31;
+    int TMax_n = ~TMin_n;
+    return x >= TMin_n && x <= TMax_n;
+  }
+  int TMin_n = -(1 << (n-1)); // what is that negative for? fail on 32 only
+  // int TMin_n = ~(1 << (n-1)) + 1; // try removing
   int TMax_n = (1 << (n-1)) - 1;
   return x >= TMin_n && x <= TMax_n;
 }
