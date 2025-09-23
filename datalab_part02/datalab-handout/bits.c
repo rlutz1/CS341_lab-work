@@ -184,6 +184,7 @@ int fitsBits(int x, int n) {
   // printf("%d\n", !(shoveBits ^ oneMoreShove));
   return !(shoveBits ^ oneMoreShove);
 
+
   // printing for debug
   // printf("shove bits: %x\n", shoveBits);
   // printf("one more shove bits: %x\n", oneMoreShove);
