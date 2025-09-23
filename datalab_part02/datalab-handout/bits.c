@@ -179,11 +179,6 @@ NOTES:
  */
 int fitsBits(int x, int n) { 
   // APPROACH 1:
-  // same num
-  // int intMin = 0x1 << 31;
-  // int TMin_n = -(1 << (32-1));
-  // printf("%d, %d\n", TMin_n, intMin);
-
   int shoveBits = x >> (n + (~0));
   int oneMoreShove = shoveBits >> 1; // potential issue with >> word size?
   // printf("%d\n", !(shoveBits ^ oneMoreShove));

@@ -62,44 +62,31 @@ unsigned f2u(float f) {
    - 3 additional Zanabazar Square characters */
 int test_fitsBits(int x, int n)
 {
+
+  // NEW APPROACH:
   // this appears to consistently work with given n in [1, 32]
-  int intMax = 0x1 << 31; // force arithemtic right
+
+  int intMax = 0x1 << 31; // force arithemtic right; this is left as a sanity check but can instead be: int intMax = 0x80000000; 
+  // int intMax = 0x80000000; 
   int TMin_n = intMax >> (32 - n);
   int TMax_n = ~TMin_n;
   return x >= TMin_n && x <= TMax_n; // comparisons consistently work
 
-  // int TMin_n = -(1 << (n-1));
+  // OLD APPROACH:
+
+  // int TMin_n = -(1 << (n-1)); 
   // int TMax_n = (1 << (n-1)) - 1;
-  // // printf("n = %d, min %x, max %x\n", n, TMin_n, TMax_n);
-  // return x >= TMin_n && x <= TMax_n;
 
-  // below if works to isolate the edge case problem child
-  // with the original code
+  // // this can force n = 32 to pass, but can timeout the tester:
+  // // printf("n = %d, min %x, max %x\n", n, TMin_n, TMax_n); 
 
-  // if (n == 32) {
-  //   int TMin_n = 0x1 << 31;
-  //   int TMax_n = ~TMin_n;
-  //   return x >= TMin_n && x <= TMax_n;
-  // }
+  // // specifically, it appears that printing TMax_n seems to make it work consistently:
+  // // if (TMin_n == -1) { // arbitrary choice, if 0 and print statement never reached, back to failure
+  // //   printf("%d\n", TMax_n); // uncomment -> passes
+  // //   // printf("%d\n", TMin_n); // uncomment -> fails
+  // // }
 
-  // something about this original code causes problems when making comparisons.
-  // CONSISTENT: if i have a print statement in the code body, 
-  // this test PASSES. if no print statement, this test FAILS.
-  // despite the fact that TMin_n1 == Tmin_n2 and Tmax_n1 == Tmax_n2 for all cases. none seem to catch.
-  // int TMin_n2 = -(1 << (n-1)); 
-  // int TMax_n2 = (1 << (n-1)) - 1;
-
-  // if (TMin_n != TMin_n2) 
-  //   printf("!!!!!!!!tmins didn't match for n = %d: %x, %x\n", n, TMin_n, TMin_n2);
-
-  // if (TMax_n != TMax_n2) 
-  //   printf("!!!!!!!!tmaxs didn't match for n = %d: %x, %x\n", n, TMax_n, TMax_n2);
-
-  // return x >= TMin_n2 && x <= TMax_n2; // comparisons consistently work
-  // printing for debugging
-  // printf("n = %d, min %x, max %x\n", n, TMin_n2, TMax_n2); // printing specifically _n2 values will fix the bug
-  // int test = 0;
-
+  // return x >= TMin_n && x <= TMax_n; // comparisons inconsistently work
   
 }
 int test_greatestBitPos(int x) {
