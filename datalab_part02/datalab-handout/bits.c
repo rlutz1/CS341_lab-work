@@ -178,35 +178,19 @@ NOTES:
  *   Rating: 2
  */
 int fitsBits(int x, int n) { 
-  // APPROACH 1:
-  int shoveBits = x >> (n + (~0));
-  int oneMoreShove = shoveBits >> 1; // potential issue with >> word size?
-  // printf("%d\n", !(shoveBits ^ oneMoreShove));
-  return !(shoveBits ^ oneMoreShove);
+  /**
+   * @author Roxanne Lutz
+   * if a right shift by n - 1 bits results in all ones or zeros,
+   * the number x is representable in n bits.
+   * otherwise, it is not.
+   */
 
-
-  // printing for debug
-  // printf("shove bits: %x\n", shoveBits);
-  // printf("one more shove bits: %x\n", oneMoreShove);
-  // printf("returning (0 for nope): %x\n", !(shoveBits ^ oneMoreShove));
-  
-  
-  // APPROACH 2 (ILLEGAL): 
-  // still fails on 0? but gets past the int min case
-  // if (shoveBits == 0 || shoveBits == -1 ) { // or this, but extra illegal
-  // if (!(shoveBits & 0xFFFFFFFF)) { // shoveBits is 0000...0000S
-  //   // printf("1\n");
-  //   return 1;
-  // }
-
-  // if (!((~shoveBits) & 0xFFFFFFFF)) {
-  //    // shoveBits is 1111...1111
-  //   // printf("1\n");
-  //   return 1;
-  // }
-
-  // // printf("0\n");
-  // return 0;
+  int shoveBits = x >> (n + (~0)); // shove x right n - 1 bits
+  int oneMoreShove = shoveBits >> 1; // shove x right 1 more time
+  // if all shift1 all ones or zeros, shift1 ^ shift2 will return 0
+  // otherwise, ^ returns non-zero.
+  // negate for proper return value.
+  return !(shoveBits ^ oneMoreShove); 
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -217,9 +201,16 @@ int fitsBits(int x, int n) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+  /**
+   * @author Roxanne Lutz
+   * count the zero streak on left hand side of binary x.
+   * then, shift 1 << (n - 1) - (zero streak)
+   * return apporpriate mask, compensating for zero edge case.
+   */
+
   int shove = 0; // initializing this up here because dlc liked to complain :)
-  int xZeroCleared = x + (!x); // clear out the zero edge case
-  int notX = ~xZeroCleared; // not x
+  int xZeroCleared = x + (!x); // clear out the zero edge case (see pdf for explanation)
+  int notX = ~xZeroCleared; // not x, turn problem into counting 1 streak
 
   // perform left bit count on our flipped number, code is copied and modified from leftBitCount function body.
   // below is equivalent of: int streak = leftBitCount(notX);
@@ -267,7 +258,7 @@ int greatestBitPos(int x) {
 
   // end left bit count
   
-  shove = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak, fixing the 0 edge case
+  shove = 0x1 << (32 + (~streak)); // shove over 1 as far as 31 - streak
   return shove & x; // keep the shoved one for every number except for zero. 
 }
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -283,11 +274,18 @@ int greatestBitPos(int x) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  int intMax = 0x1 << 31;
-  int leftMostBit = x & intMax;
-  int spreadLMB = leftMostBit >> 31;
-  int notSpreadLMB = ~spreadLMB;
-  int flipOnlyPositives = x ^ notSpreadLMB;
+  /**
+   * @author Roxanne Lutz
+   * count the number of consecutive ones or zeros on the left hand side of the number, seeing
+   * how many "unneeded bits" there are at the beginning that you don't need to rep the number.
+   * return (n + 1) - streak (n + 1 to account for the sign bit)
+   */
+
+  int intMax = 0x1 << 31; // variable for clarity
+  int leftMostBit = x & intMax; // test for negative number (0x80000000 if neg, 0 if pos)
+  int spreadLMB = leftMostBit >> 31; // arithmetically extend the resulting sign bit from test
+  int notSpreadLMB = ~spreadLMB; // neg: ~1111 => 0000, pos: ~0000 => 1111
+  int flipOnlyPositives = x ^ notSpreadLMB; // pos x ^ 1111 = ~x, neg x ^ 0000 = x
 
   // perform left bit count on our flipped number, code is copied and modified from leftBitCount function body.
   // below is equivalent of: int streak = leftBitCount(flipOnlyPositives);
@@ -346,6 +344,11 @@ int howManyBits(int x) {
  *   Rating: 4
  */
 int leftBitCount(int x) {
+  /**
+   * @author Roxanne Lutz
+   * 
+   */
+
   // initialize last and shift as x for now
   int last = x;
   int shift = x;
@@ -466,12 +469,16 @@ unsigned float_i2f(int x) {
  */
 int trueFiveEighths(int x)
 {
-    int intMax = 0x1 << 31;
-    int extraRemainderAdjust = ((x & 0x4) >> 2) & (x & 0x1); // only add one if 1X1 pattern matches
-    int negAdjust = !(!(x & intMax)) & !(!(x & 0x7)); // adjust negative numbers by 1 unless divisible by 8
-    int divBy2 = x >> 1;
-    int divBy8 = x >> 3;
-    return divBy2 + divBy8 + extraRemainderAdjust + negAdjust;
+  /**
+   * @author Roxanne Lutz
+   */
+
+  int intMax = 0x1 << 31;
+  int extraRemainderAdjust = ((x & 0x4) >> 2) & (x & 0x1); // only add one if 1X1 pattern matches
+  int negAdjust = !(!(x & intMax)) & !(!(x & 0x7)); // adjust negative numbers by 1 unless divisible by 8
+  int divBy2 = x >> 1;
+  int divBy8 = x >> 3;
+  return divBy2 + divBy8 + extraRemainderAdjust + negAdjust;
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
@@ -485,6 +492,10 @@ int trueFiveEighths(int x)
  */
 int trueThreeFourths(int x)
 {
+  /**
+   * @author Roxanne Lutz
+   */
+
   int divByFour = x >> 2; // x * (1/(2^2))
   int intMax = 0x1 << 31; // int max: 1000..00
   int zeroNegOnePos = !(x & intMax); // returns 1 for positive nums, 0 for negs
