@@ -346,7 +346,11 @@ int howManyBits(int x) {
 int leftBitCount(int x) {
   /**
    * @author Roxanne Lutz
-   * 
+   * idea is to count the number of ones in left streak as a combination
+   * of summing 1, 2, 4, 8, and 16.
+   * if a shift results in all ones, we add the amount we shifted extra by, otherwise add 0.
+   * if a shift results in all ones, keep last shift the same, otherwise update to shifted value.
+   * please see pdf for a clearer run through of how this works.
    */
 
   // initialize last and shift as x for now
@@ -471,14 +475,17 @@ int trueFiveEighths(int x)
 {
   /**
    * @author Roxanne Lutz
+   * conduct shifts equivalent to (1/2)x + (1/8)x
+   * adjust the (1) loss of remainder special case and (2) faulty double round down of negatives
+   * return the summation of the division + two adjustments
    */
 
-  int intMax = 0x1 << 31;
+  int intMax = 0x1 << 31; // variable for clarity
   int extraRemainderAdjust = ((x & 0x4) >> 2) & (x & 0x1); // only add one if 1X1 pattern matches
   int negAdjust = !(!(x & intMax)) & !(!(x & 0x7)); // adjust negative numbers by 1 unless divisible by 8
-  int divBy2 = x >> 1;
-  int divBy8 = x >> 3;
-  return divBy2 + divBy8 + extraRemainderAdjust + negAdjust;
+  int divBy2 = x >> 1; // (1/2)x
+  int divBy8 = x >> 3; // (1/8)x
+  return divBy2 + divBy8 + extraRemainderAdjust + negAdjust; // return summation
 }
 /*
  * trueThreeFourths - multiplies by 3/4 rounding toward 0,
@@ -494,19 +501,22 @@ int trueThreeFourths(int x)
 {
   /**
    * @author Roxanne Lutz
+   * find (3/4)x by summing (1/4)x + (1/4)x + (1/4)x.
+   * adjust (1) neg numbers by the last two bits straight to compensate for double
+   * round down and (2) pos numbers by 1 less than the the last two bits to allow
+   * for an allowable initial round down.
+   * return summation of division + two adjustment
    */
 
-  int divByFour = x >> 2; // x * (1/(2^2))
-  int intMax = 0x1 << 31; // int max: 1000..00
+  int divByFour = x >> 2; // (1/4)x
+
+  int intMax = 0x1 << 31; // variable for clarity
   int zeroNegOnePos = !(x & intMax); // returns 1 for positive nums, 0 for negs
   int lastTwoBits = x & 0x3; // grab the last two bits of any number
   int flipOne = !lastTwoBits; // 00 -> 1, all else -> 0
   int flipTwo = !flipOne; // // (00) 1 -> 0, (all else) 0 -> 1
-  
-  // 1 & pos (1) -> 1
-  // 0 & pos (1) -> 0
-  // 1, 0 & neg (0) -> 0
   int posAdjust = ~(flipTwo & zeroNegOnePos) + 1; // finally, make negative 1 as needed or remain zero
   int adjustment = lastTwoBits + posAdjust; // subtract 1 from last two bits as needed
+  
   return divByFour + divByFour + divByFour + adjustment; // get three fourths with needed adjustment for rounding
 }
