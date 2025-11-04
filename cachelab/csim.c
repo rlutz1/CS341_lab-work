@@ -10,17 +10,18 @@ typedef struct  {
     char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
     char valid; // 0 or 1
     short priority; // for mimicking LRU functionality. likely never more than short
-    char data[];
+    short numBlocks;
+    char *data;
 } Line;
 
 typedef struct {
     int numLines; // added because C is complaining with it, boo
-    Line lines[];
+    Line *lines;
 } Set;
 
 typedef struct {
     int numSets;
-    Set sets[];
+    Set *sets;
 } Cache;
 
 typedef struct {
@@ -38,7 +39,7 @@ int misses = 0;
 int evictions = 0;
 
 // method declarations
-SetupInfo extractArgs(int argc, char *argv[]);
+Cache extractArgs(int argc, char *argv[]);
 void parseFile();
 void tryReadCache(void *addr);
 void tryWriteCach(void *addr);
@@ -46,13 +47,32 @@ void tryWriteCach(void *addr);
 int main(int argc, char *argv[])
 {
     // (1) extract all arguments and values 
-    SetupInfo si = extractArgs(argc, argv);
-    printf("%d", si.numSets); printf("\n"); // s
-    printf("%d",si.numSetIndexBits); printf("\n");
-    printf("%d",si.numLines); printf("\n"); // E
-    printf("%d",si.numBlocks); printf("\n"); // b
-    printf("%d",si.numBlockBits); printf("\n");
-    printf("%s",si.traceFilename); printf("\n");
+    Cache cache = extractArgs(argc, argv);
+    
+    printf("%d", cache.numSets); printf("\n"); // s
+    for (int i = 0; i < cache.numSets; i++) {
+        Set set = cache.sets[i];
+        printf("%d \n", set.numLines);
+        for (int j = 0; j < set.numLines; j++) {
+            Line line = set.lines[j];
+    //             char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
+    // char valid; // 0 or 1
+    // short priority; // for mimicking LRU functionality. likely never more than short
+    // short numBlocks;
+    // char *data;
+            printf("%s \n", line.tag);
+            printf("%d \n", line.valid);
+            printf("%d \n", line.priority);
+            printf("%d \n", line.numBlocks);
+            printf("%s \n", line.data);
+            printf("END LINE\n");
+        }
+    }
+    // printf("%d",cache.numSetIndexBits); printf("\n");
+    // printf("%d",cache.numLines); printf("\n"); // E
+    // printf("%d",cache.numBlocks); printf("\n"); // b
+    // printf("%d",cache.numBlockBits); printf("\n");
+    // printf("%s",cache.traceFilename); printf("\n");
     // (2) parse the file given into iterable lines. only needed data. 
     // -- parseFile()
     // (3) go through lines and attempt to interact through cache
@@ -64,9 +84,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-SetupInfo extractArgs(int argc, char *argv[]) {
+Cache extractArgs(int argc, char *argv[]) {
     int opt;
     SetupInfo si = {0, 0, 0, 0};
+   
     // put ':' in the starting of the
     // string so that program can 
     //distinguish between '?' and ':' 
@@ -96,6 +117,39 @@ SetupInfo extractArgs(int argc, char *argv[]) {
                 break; 
         } // end switch case
     }  // end loop
-    return si;
+
+
+// struct definitions for ease of reading
+// typedef struct  {
+//     char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
+//     char valid; // 0 or 1
+//     short priority; // for mimicking LRU functionality. likely never more than short
+//     char data[];
+// } Line;
+
+// typedef struct {
+//     int numLines; // added because C is complaining with it, boo
+//     Line lines[];
+// } Set;
+
+
+    Set sets[si.numSets];
+    for (int i = 0; i < si.numSets; i++) {
+        
+        Line lines[si.numLines];
+
+        for (int j = 0; j < si.numLines; j++) {
+            char blocks[si.numBlocks];
+            Line line = {0, 0, -1, si.numBlocks, blocks};
+            lines[j] = line;
+        } // end loop
+
+        Set set = {si.numLines, lines};
+        sets[i] = set;
+    } // end loop
+
+    Cache cache = {si.numSets, sets};
+    // return si;
+    return cache;
     // TODO: test this and print out the shtuff.
 }
