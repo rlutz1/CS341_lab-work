@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>  
+#include <stdio.h>
 
 // struct definitions for ease of reading
 typedef struct  {
@@ -46,6 +47,12 @@ int main(int argc, char *argv[])
 {
     // (1) extract all arguments and values 
     SetupInfo si = extractArgs(argc, argv);
+    printf("%d", si.numSets); printf("\n"); // s
+    printf("%d",si.numSetIndexBits); printf("\n");
+    printf("%d",si.numLines); printf("\n"); // E
+    printf("%d",si.numBlocks); printf("\n"); // b
+    printf("%d",si.numBlockBits); printf("\n");
+    printf("%s",si.traceFilename); printf("\n");
     // (2) parse the file given into iterable lines. only needed data. 
     // -- parseFile()
     // (3) go through lines and attempt to interact through cache
@@ -59,11 +66,11 @@ int main(int argc, char *argv[])
 
 SetupInfo extractArgs(int argc, char *argv[]) {
     int opt;
-    SetupInfo si = {0, 0, 0, NULL};
+    SetupInfo si = {0, 0, 0, 0};
     // put ':' in the starting of the
     // string so that program can 
     //distinguish between '?' and ':' 
-    while((opt = getopt(argc, argv, ":if:lrx")) != -1) 
+    while((opt = getopt(argc, argv, "s:E:b:t:")) != -1) 
     { 
         switch(opt) 
         { 
@@ -89,6 +96,6 @@ SetupInfo extractArgs(int argc, char *argv[]) {
                 break; 
         } // end switch case
     }  // end loop
-
+    return si;
     // TODO: test this and print out the shtuff.
 }
