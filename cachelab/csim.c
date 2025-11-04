@@ -99,7 +99,7 @@ Cache extractArgs(int argc, char *argv[]) {
                 si.numSetIndexBits = atoi(optarg);
                 si.numSets = pow(2, si.numSetIndexBits);
                 break;
-            case 'E':
+            case 'E': // nothing
                 si.numLines = atoi(optarg);
                 break;
             case 'b':
