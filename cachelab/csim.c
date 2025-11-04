@@ -49,22 +49,25 @@ int main(int argc, char *argv[])
     // (1) extract all arguments and values 
     Cache cache = extractArgs(argc, argv);
     
-    printf("%d", cache.numSets); printf("\n"); // s
+    printf("number of sets: %d \n", cache.numSets); 
+
     for (int i = 0; i < cache.numSets; i++) {
+
         Set set = cache.sets[i];
-        printf("%d \n", set.numLines);
+        printf("num lines in set %d: %d \n", i, set.numLines);
         for (int j = 0; j < set.numLines; j++) {
             Line line = set.lines[j];
-    //             char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
+    // char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
     // char valid; // 0 or 1
     // short priority; // for mimicking LRU functionality. likely never more than short
     // short numBlocks;
     // char *data;
-            printf("%s \n", line.tag);
-            printf("%d \n", line.valid);
-            printf("%d \n", line.priority);
-            printf("%d \n", line.numBlocks);
-            printf("%s \n", line.data);
+            printf("LINE %D \n", j);
+            printf("tag in line: %s \n", line.tag);
+            printf("valid bit: %d \n", line.valid);
+            printf("priority: %d \n", line.priority);
+            printf("number of bytes of data in line: %d \n", line.numBlocks);
+            printf("data in blocks of line: %s \n", line.data);
             printf("END LINE\n");
         }
     }
@@ -99,7 +102,7 @@ Cache extractArgs(int argc, char *argv[]) {
                 si.numSetIndexBits = atoi(optarg);
                 si.numSets = pow(2, si.numSetIndexBits);
                 break;
-            case 'E': // nothing
+            case 'E': 
                 si.numLines = atoi(optarg);
                 break;
             case 'b':
