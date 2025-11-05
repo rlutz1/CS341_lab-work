@@ -24,58 +24,37 @@ typedef struct {
     Set *sets;
 } Cache;
 
-typedef struct {
-    int numSets;
-    int numSetIndexBits;
-    int numLines;
-    int numBlocks;
-    int numBlockBits;
-    char *traceFilename;
-} SetupInfo;
+// typedef struct {
+//     int numSets;
+//     int numSetIndexBits;
+//     int numLines;
+//     int numBlocks;
+//     int numBlockBits;
+//     char *traceFilename;
+// } SetupInfo;
 
 // globals
+static char *traceFilename = 0;
 int hits = 0;
 int misses = 0;
 int evictions = 0;
 
 // method declarations
-Cache extractArgs(int argc, char *argv[]);
+Cache initCache(int argc, char *argv[]);
 void parseFile();
 void tryReadCache(void *addr);
 void tryWriteCach(void *addr);
+void checkNullPtr(void *ptr);
+void freeAllMemory(Cache cache);
+void printCache(Cache cache);
 
 int main(int argc, char *argv[])
-{
+{    // malloc you fucking idiot
     // (1) extract all arguments and values 
-    Cache cache = extractArgs(argc, argv);
+    Cache cache = initCache(argc, argv);
+    printCache(cache);
     
-    printf("number of sets: %d \n", cache.numSets); 
 
-    for (int i = 0; i < cache.numSets; i++) {
-
-        Set set = cache.sets[i];
-        printf("num lines in set %d: %d \n", i, set.numLines);
-        for (int j = 0; j < set.numLines; j++) {
-            Line line = set.lines[j];
-    // char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
-    // char valid; // 0 or 1
-    // short priority; // for mimicking LRU functionality. likely never more than short
-    // short numBlocks;
-    // char *data;
-            printf("LINE %D \n", j);
-            printf("tag in line: %s \n", line.tag);
-            printf("valid bit: %d \n", line.valid);
-            printf("priority: %d \n", line.priority);
-            printf("number of bytes of data in line: %d \n", line.numBlocks);
-            printf("data in blocks of line: %s \n", line.data);
-            printf("END LINE\n");
-        }
-    }
-    // printf("%d",cache.numSetIndexBits); printf("\n");
-    // printf("%d",cache.numLines); printf("\n"); // E
-    // printf("%d",cache.numBlocks); printf("\n"); // b
-    // printf("%d",cache.numBlockBits); printf("\n");
-    // printf("%s",cache.traceFilename); printf("\n");
     // (2) parse the file given into iterable lines. only needed data. 
     // -- parseFile()
     // (3) go through lines and attempt to interact through cache
@@ -84,33 +63,37 @@ int main(int argc, char *argv[])
     // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
     // ** COUNT HITS AND MISSES AND EVICTIONS!
     printSummary(hits, misses, evictions);
+    freeAllMemory(cache);
     return 0;
 }
 
-Cache extractArgs(int argc, char *argv[]) {
+Cache initCache(int argc, char *argv[]) {
     int opt;
-    SetupInfo si = {0, 0, 0, 0};
-   
-    // put ':' in the starting of the
-    // string so that program can 
-    //distinguish between '?' and ':' 
+    int numSets = 0;
+    int numSetIndexBits = 0;
+    int numLines = 0;
+    int numBlocks = 0;
+    int numBlockBits = 0;
+    
+    // use getopt to easily extract arguments
     while((opt = getopt(argc, argv, "s:E:b:t:")) != -1) 
     { 
+
         switch(opt) 
         { 
             case 's':
-                si.numSetIndexBits = atoi(optarg);
-                si.numSets = pow(2, si.numSetIndexBits);
+                numSetIndexBits = atoi(optarg);
+                numSets = pow(2, numSetIndexBits);
                 break;
             case 'E': 
-                si.numLines = atoi(optarg);
+                numLines = atoi(optarg);
                 break;
             case 'b':
-                si.numBlockBits = atoi(optarg);
-                si.numBlocks = pow(2, si.numBlockBits);
+                numBlockBits = atoi(optarg);
+                numBlocks = pow(2, numBlockBits);
                 break;
             case 't':
-                si.traceFilename = optarg;
+                traceFilename = optarg;
                 break;
             case ':': 
                 printf("option needs a value\n"); 
@@ -121,38 +104,79 @@ Cache extractArgs(int argc, char *argv[]) {
         } // end switch case
     }  // end loop
 
+    // initialize the cache based on passed paramaters
+    Set *sets = (Set *) malloc(numSets * sizeof(Set));
+    checkNullPtr(sets);
+    for (int i = 0; i < numSets; i++) {
 
-// struct definitions for ease of reading
-// typedef struct  {
-//     char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
-//     char valid; // 0 or 1
-//     short priority; // for mimicking LRU functionality. likely never more than short
-//     char data[];
-// } Line;
+        Line *lines = (Line *) malloc(numLines * sizeof(Line));
+        checkNullPtr(lines);
 
-// typedef struct {
-//     int numLines; // added because C is complaining with it, boo
-//     Line lines[];
-// } Set;
+        for (int j = 0; j < numLines; j++) {
+            char *blocks = (char *) malloc(numBlocks * sizeof(char));
+            checkNullPtr(blocks);
 
-
-    Set sets[si.numSets];
-    for (int i = 0; i < si.numSets; i++) {
-        
-        Line lines[si.numLines];
-
-        for (int j = 0; j < si.numLines; j++) {
-            char blocks[si.numBlocks];
-            Line line = {0, 0, -1, si.numBlocks, blocks};
+            Line line = {0, 0, -1, numBlocks, blocks}; // maybe fine?
             lines[j] = line;
+          //  printf("set %d line %d", i, j);
         } // end loop
 
-        Set set = {si.numLines, lines};
+        Set set = {numLines, lines};
         sets[i] = set;
     } // end loop
 
-    Cache cache = {si.numSets, sets};
+    Cache cache = {numSets, sets};
     // return si;
     return cache;
     // TODO: test this and print out the shtuff.
 }
+
+void checkNullPtr(void *ptr) {
+    if (!ptr) {
+        printf("Null pointer returned by malloc.\n");
+        exit(2);
+    } // end if
+} // end method
+
+// sets
+// lines
+// blocks
+void freeAllMemory(Cache cache) {
+    printf("Freeing memory... \n"); 
+
+    for (int i = 0; i < cache.numSets; i++) {
+
+        Set set = cache.sets[i];
+        Line *lines = set.lines;
+        for (int j = 0; j < set.numLines; j++) {
+            // Line line = set.lines[j];
+            Line line = lines[j];
+            free(line.data);
+        } // end loop
+        free(lines);
+    }
+    free(cache.sets);
+} // end method
+
+void printCache(Cache cache) {
+    printf("Number of sets: %d \n\n", cache.numSets); 
+
+    for (int i = 0; i < cache.numSets; i++) {
+
+        Set set = cache.sets[i];
+        Line *lines = set.lines;
+        printf("Num lines in set %d: %d \n", i, set.numLines);
+        for (int j = 0; j < set.numLines; j++) {
+  
+            Line line = lines[j];
+   
+            printf("\nLINE %d \n", j);
+            printf("tag in line: %s \n", line.tag);
+            printf("valid bit: %d \n", line.valid);
+            printf("priority: %d \n", line.priority);
+            printf("number of bytes of data in line: %d \n", line.numBlocks);
+            printf("data in blocks of line: %s \n", line.data);
+            printf("END LINE\n\n");
+        } // end loop
+    } // end loop
+} // end method
