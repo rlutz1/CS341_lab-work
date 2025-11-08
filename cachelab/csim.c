@@ -24,20 +24,11 @@ typedef struct {
     Set *sets;
 } Cache;
 
-// typedef struct {
-//     int numSets;
-//     int numSetIndexBits;
-//     int numLines;
-//     int numBlocks;
-//     int numBlockBits;
-//     char *traceFilename;
-// } SetupInfo;
-
 // globals
 static char *traceFilename = 0;
-int hits = 0;
-int misses = 0;
-int evictions = 0;
+static int hits = 0;
+static int misses = 0;
+static int evictions = 0;
 
 // method declarations
 Cache initCache(int argc, char *argv[]);
