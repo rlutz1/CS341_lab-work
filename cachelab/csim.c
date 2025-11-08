@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <math.h>  
 #include <stdio.h>
+#include <string.h>
 
 #define MAX_LINE_SIZE 256
 #define NUM_HEX_IN_ADDRESS 16
@@ -43,8 +44,8 @@ static int evictions = 0;
 // method declarations
 Cache initCache(int argc, char *argv[]);
 void simulate(Cache cache);
-void hit();
-void miss();
+void hit(Line *line);
+void miss(Set set);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
 void tryReadCache(void *addr);
@@ -97,28 +98,46 @@ void simulate(Cache cache) {
                 // we can ignore the size here
 
                 // okay, so we have the binary rep now in binaryAddress
-                // we need the cache to know how many bits for set and block
-                // m - (s + b) is the tag, held in cache
+                // we need the cache to know how many bits for tag, set, and block offset
+               
                 char tag[cache.numTagBits];
-
-                // for (int i = 0; i < cache.numTagBits; i++) {
-                //     tag[i] = 0;
-                // } // end loop
-            
+                // grab the tag from the binary address
                 for (int i = 0; i < cache.numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
-                tag[cache.numTagBits] = '\0';
+                tag[cache.numTagBits] = '\0'; // enforce null for ease of printing
 
+                // grab the set bits
+                // TODO: get rid of this char[] and just compute the decimal in 1 fell swoop?
                 char setNum[cache.numSetBits];
                 for (int i = cache.numTagBits, j = 0; j < cache.numSetBits; i++, j++) {
                     setNum[j] = binaryAddress[i];
                 } // end loop
-                setNum[cache.numSetBits] = '\0';
+                setNum[cache.numSetBits] = '\0'; // enforce null for ease of printing
 
                 printf("tag: %s\nsetnum: %s\n", tag, setNum);
                 // we can snag set bits and convert that to decimal
-                // then we need tag
+                int setIndex = 0;
+                for (int i = (cache.numSetBits - 1), j = 0; i > -1; i--, j++) {
+                    if (setNum[i] == '1') 
+                        setIndex += pow(2, j);
+                } // end loop
+
+                printf("set index: %d\n", setIndex);
+                char hitFound = 0;
+                Set currSet = *(cache.sets + (setIndex * sizeof(Set)));
+                // printf("sakdnasjdbsak");
+                for (int i = 0; i < currSet.numLines; i++) {
+                    Line *line = currSet.lines + (i * sizeof(Line));
+                    if (strcmp(line -> tag, tag) == 0)  {
+                        hits++; hitFound = 1; hit(line);
+                        break;
+                    }
+                }
+
+                if (!hitFound) {
+                    misses++; miss(currSet);
+                }
                 // we look at cache.sets[set decimal]
                 // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
                 // if (tag == tag): hit count++; hit() // conduct hit procedure
@@ -136,11 +155,11 @@ void simulate(Cache cache) {
 } // end method
 
 
-void hit() {
+void hit(Line *line) {
 
 }
 
-void miss() {
+void miss(Set set) {
     // need to increment eviction here if that is needed
 }
 
