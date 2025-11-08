@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {    // malloc you fucking idiot
     // (1) extract all arguments and values 
     Cache cache = initCache(argc, argv);
-    printCache(cache);
+    // printCache(cache);
 
     // (2) go through lines and attempt to interact through cache
     // -- if L: tryReadCache(addr)
@@ -100,15 +100,21 @@ void simulate(Cache cache) {
                 // we need the cache to know how many bits for set and block
                 // m - (s + b) is the tag, held in cache
                 char tag[cache.numTagBits];
+
+                // for (int i = 0; i < cache.numTagBits; i++) {
+                //     tag[i] = 0;
+                // } // end loop
             
                 for (int i = 0; i < cache.numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
+                tag[cache.numTagBits] = '\0';
 
                 char setNum[cache.numSetBits];
                 for (int i = cache.numTagBits, j = 0; j < cache.numSetBits; i++, j++) {
                     setNum[j] = binaryAddress[i];
                 } // end loop
+                setNum[cache.numSetBits] = '\0';
 
                 printf("tag: %s\nsetnum: %s\n", tag, setNum);
                 // we can snag set bits and convert that to decimal
@@ -300,6 +306,7 @@ Cache initCache(int argc, char *argv[]) {
         numBlockBits, 
         sets
     };
+    // printf("%d\n", cache.numTagBits);
     return cache;
 } // end method
 
