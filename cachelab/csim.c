@@ -44,11 +44,10 @@ int main(int argc, char *argv[])
     // (1) extract all arguments and values 
     Cache cache = initCache(argc, argv);
     printCache(cache);
-    
 
     // (2) parse the file given into iterable lines. only needed data. 
     // -- parseFile()
-    // (3) go through lines and attempt to interact through cache
+    // (2) go through lines and attempt to interact through cache
     // -- if L: tryReadCache(addr)
     // -- if S: tryWriteCache(addr) // kinda the same as L really
     // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
@@ -57,6 +56,33 @@ int main(int argc, char *argv[])
     freeAllMemory(cache);
     return 0;
 }
+
+void simluate() {
+    if (traceFilename) {
+        FILE *fp;
+        char *line = 0;
+        size_t len = 0;
+        ssize_t read;
+
+        fp = fopen(traceFilename, "r");
+        
+        if (!fp) {
+            printf("Something went wrong: file open failed.\n"); return;
+        } // end if
+
+        while ((read = getline(&line, &len, fp)) != -1) {
+            printf("Retrieved line of length %zu:\n", read);
+            printf("%s", line);
+        } // end loop
+        fclose(fp);
+
+        if (line)
+            free(line);
+
+    } else {
+        printf("Something went wrong: trace file name was not given.\n");
+    } // end if
+} // end method
 
 Cache initCache(int argc, char *argv[]) {
     int opt;
@@ -117,10 +143,8 @@ Cache initCache(int argc, char *argv[]) {
     } // end loop
 
     Cache cache = {numSets, sets};
-    // return si;
     return cache;
-    // TODO: test this and print out the shtuff.
-}
+} // end method
 
 void checkNullPtr(void *ptr) {
     if (!ptr) {
@@ -129,9 +153,12 @@ void checkNullPtr(void *ptr) {
     } // end if
 } // end method
 
-// sets
-// lines
-// blocks
+/**
+ * need to ensure freeing of all malloc'd memory upon program exit:
+ * + sets
+ * + lines
+ * + blocks
+ */
 void freeAllMemory(Cache cache) {
     printf("Freeing memory... \n"); 
 
@@ -149,6 +176,9 @@ void freeAllMemory(Cache cache) {
     free(cache.sets);
 } // end method
 
+/**
+ * method for printing cache for debugging purposes only.
+ */
 void printCache(Cache cache) {
     printf("Number of sets: %d \n\n", cache.numSets); 
 
