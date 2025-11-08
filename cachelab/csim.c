@@ -6,6 +6,11 @@
 #include <stdio.h>
 
 #define MAX_LINE_SIZE 256
+#define NUM_HEX_IN_ADDRESS 16
+#define NUM_BITS_IN_ADDRESS 64
+#define SPACE_INDEX 0 
+#define ACTION_INDEX 1
+#define ADDRESS_START_INDEX 3
 
 // struct definitions for ease of reading
 typedef struct  {
@@ -75,13 +80,13 @@ void simulate() {
         while (fgets(line, sizeof(line), fp)) {
             // printf("%s", line);
 
-            if (line[0] == ' ') { // ignore all I instructions
+            if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
                 printf("%s", line);
                 // we need to (1) snag the argument
-                char action = line[1];
+                char action = line[ACTION_INDEX];
                 printf("%c\n", action);
                 // (2) grab the hex address and convert to binary
-                char binaryAddress[64] = {0};
+                char binaryAddress[NUM_BITS_IN_ADDRESS] = {0};
                 getAddressConversion(line, binaryAddress);
                 printf("%s\n", binaryAddress);
                 // we can ignore the size here
@@ -104,44 +109,41 @@ void simulate() {
  * number of bits is at least 64
  */
 void getAddressConversion(char *line, char *binaryAddress) {
-    // char *binaryAddress = (char *) malloc(64 * sizeof(char)); // 64 bits
     char hex;
     char *hexToBinary;
+    char binaryIndex = 0; // index for filling binary rep of address
+    short lineIndex = ADDRESS_START_INDEX; // start of the address in line
+    char countHex = 0; // for counting how many hex given
 
-    char startIndex = 3;
-    // char endIndex = 11; // characters 3 - 10 are the address
-    char binaryIndex = 0;
-   
-    char countHex = 0;
-    short index = 3;
+    // count how many hex chars there are in given address
+    while (line[lineIndex] != ',') {
+        countHex++;
+        lineIndex++;
+    } // end loop
 
-    while (line[index] != ',') {
-        countHex += 1;
-        index += 1;
-    }
+    lineIndex = ADDRESS_START_INDEX; // reset
 
-    char fillerZeros = (16 - countHex) * 4; // have 2, expecting 8, that means 6 filler zeros
-    for (int i = 0; i < fillerZeros; i++) {
+    // calculate how many filler zeros needed at start of binary address
+    char fillerZeros = (NUM_HEX_IN_ADDRESS - countHex) * 4;
+    for (short i = 0; i < fillerZeros; i++) { // fill with filler zeros
         binaryAddress[i] = '0';
     } // end loop
 
-    binaryIndex = fillerZeros;
-    printf("filler zeros: %s\n", binaryAddress);
+    binaryIndex = fillerZeros; // offset the index by num filler zeros
+    // printf("filler zeros: %s\n", binaryAddress);
 
-    // for (int i = startIndex; i < endIndex; i++) {
-    int i = startIndex;
-    while ((hex = line[i]) != ',') {
+    while ((hex = line[lineIndex]) != ',') { 
 
         hexToBinary = convertHexToBinary(hex); // get the binary of this hex char
         if (!hexToBinary) // don't want to continue if something went awry there
             break;
 
-        for (int j = 0; j < 4; j++) 
+        for (int j = 0; j < 4; j++) // fill with more binary
             binaryAddress[binaryIndex + j] = hexToBinary[j];
                 
-        binaryIndex += 4;
-        printf("after adding %c -> %s:\n%s\n",hex, hexToBinary, binaryAddress);
-        i++;
+        binaryIndex += 4; // leap 4 ahead
+        // printf("after adding %c -> %s:\n%s\n",hex, hexToBinary, binaryAddress);
+        lineIndex++;
     }
     // return binaryAddress;
 } // end method
