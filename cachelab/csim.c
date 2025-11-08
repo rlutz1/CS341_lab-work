@@ -35,8 +35,10 @@ static int evictions = 0;
 // method declarations
 Cache initCache(int argc, char *argv[]);
 void simulate();
+char *convertHexToBinary(char hex);
+void getAddressConversion(char *line, char *binaryAddress);
 void tryReadCache(void *addr);
-void tryWriteCach(void *addr);
+void tryWriteCache(void *addr);
 void checkNullPtr(void *ptr);
 void freeAllMemory(Cache cache);
 void printCache(Cache cache);
@@ -71,7 +73,22 @@ void simulate() {
         } // end if
 
         while (fgets(line, sizeof(line), fp)) {
-            printf("%s", line);
+            // printf("%s", line);
+
+            if (line[0] == ' ') { // ignore all I instructions
+                printf("%s", line);
+                // we need to (1) snag the argument
+                char action = line[1];
+                printf("%c\n", action);
+                // (2) grab the hex address and convert to binary
+                char binaryAddress[64] = {0};
+                getAddressConversion(line, binaryAddress);
+                printf("%s\n", binaryAddress);
+                // we can ignore the size here
+                // free(binaryAddress);
+            }
+                
+
         } // end loop
 
         fclose(fp);
@@ -81,6 +98,106 @@ void simulate() {
     } // end if
 } // end method
 
+/**
+ * purpose of this method is to grab the hex address and convert to 
+ * binary. return it as a string of binary numbers.
+ * number of bits is at least 64
+ */
+void getAddressConversion(char *line, char *binaryAddress) {
+    // char *binaryAddress = (char *) malloc(64 * sizeof(char)); // 64 bits
+    char hex;
+    char *hexToBinary;
+
+    char startIndex = 3;
+    // char endIndex = 11; // characters 3 - 10 are the address
+    char binaryIndex = 0;
+   
+    char countHex = 0;
+    short index = 3;
+
+    while (line[index] != ',') {
+        countHex += 1;
+        index += 1;
+    }
+
+    char fillerZeros = (16 - countHex) * 4; // have 2, expecting 8, that means 6 filler zeros
+    for (int i = 0; i < fillerZeros; i++) {
+        binaryAddress[i] = '0';
+    } // end loop
+
+    binaryIndex = fillerZeros;
+    printf("filler zeros: %s\n", binaryAddress);
+
+    // for (int i = startIndex; i < endIndex; i++) {
+    int i = startIndex;
+    while ((hex = line[i]) != ',') {
+
+        hexToBinary = convertHexToBinary(hex); // get the binary of this hex char
+        if (!hexToBinary) // don't want to continue if something went awry there
+            break;
+
+        for (int j = 0; j < 4; j++) 
+            binaryAddress[binaryIndex + j] = hexToBinary[j];
+                
+        binaryIndex += 4;
+        printf("after adding %c -> %s:\n%s\n",hex, hexToBinary, binaryAddress);
+        i++;
+    }
+    // return binaryAddress;
+} // end method
+
+/**
+ * super quick and dirty hex conversion
+ */
+char * convertHexToBinary(char hex) {
+    switch (hex) { // gonna do a switch case because i'm very naughty
+            case '0':
+                return "0000"; break;
+            case '1':
+                return "0001"; break;
+            case '2':
+                return "0010"; break;
+            case '3':
+                return "0011"; break;
+            case '4':
+                return "0100"; break;
+            case '5':
+                return "0101"; break;
+            case '6':
+                return "0110"; break;
+            case '7':
+                return "0111"; break;
+            case '8':
+                return "1000"; break;
+            case '9':
+                return "1001"; break;
+            case 'A':
+            case 'a':
+                return "1010"; break;
+            case 'B':
+            case 'b':
+                return "1011"; break;
+            case 'C':
+            case 'c':
+                return "1100"; break;
+            case 'D':
+            case 'd':
+                return "1101"; break;
+            case 'E':
+            case 'e':
+                return "1110"; break;
+            case 'F':
+            case 'f':
+                return "1111"; break;
+                
+        } // end return case;
+        printf("Something went wrong: received an undefined hex value: %c", hex);
+        return 0;
+} // end method
+
+/**
+ * initialize the cache based on arguments passed.
+ */
 Cache initCache(int argc, char *argv[]) {
     int opt;
     int numSets = 0;
