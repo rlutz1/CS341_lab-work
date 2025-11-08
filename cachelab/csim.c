@@ -5,6 +5,8 @@
 #include <math.h>  
 #include <stdio.h>
 
+#define MAX_LINE_SIZE 256
+
 // struct definitions for ease of reading
 typedef struct  {
     char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
@@ -32,7 +34,7 @@ static int evictions = 0;
 
 // method declarations
 Cache initCache(int argc, char *argv[]);
-void parseFile();
+void simulate();
 void tryReadCache(void *addr);
 void tryWriteCach(void *addr);
 void checkNullPtr(void *ptr);
@@ -45,39 +47,34 @@ int main(int argc, char *argv[])
     Cache cache = initCache(argc, argv);
     printCache(cache);
 
-    // (2) parse the file given into iterable lines. only needed data. 
-    // -- parseFile()
     // (2) go through lines and attempt to interact through cache
     // -- if L: tryReadCache(addr)
     // -- if S: tryWriteCache(addr) // kinda the same as L really
     // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
     // ** COUNT HITS AND MISSES AND EVICTIONS!
+    simulate();
+
     printSummary(hits, misses, evictions);
     freeAllMemory(cache);
     return 0;
 }
 
-void simluate() {
+void simulate() {
     if (traceFilename) {
         FILE *fp;
-        char *line = 0;
-        size_t len = 0;
-        ssize_t read;
+        char line[MAX_LINE_SIZE];
 
         fp = fopen(traceFilename, "r");
-        
+
         if (!fp) {
             printf("Something went wrong: file open failed.\n"); return;
         } // end if
 
-        while ((read = getline(&line, &len, fp)) != -1) {
-            printf("Retrieved line of length %zu:\n", read);
+        while (fgets(line, sizeof(line), fp)) {
             printf("%s", line);
         } // end loop
-        fclose(fp);
 
-        if (line)
-            free(line);
+        fclose(fp);
 
     } else {
         printf("Something went wrong: trace file name was not given.\n");
