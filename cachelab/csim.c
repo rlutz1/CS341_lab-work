@@ -28,6 +28,9 @@ typedef struct {
 
 typedef struct {
     int numSets;
+    int numTagBits;
+    int numSetBits;
+    int numBlockBits;
     Set *sets;
 } Cache;
 
@@ -39,7 +42,9 @@ static int evictions = 0;
 
 // method declarations
 Cache initCache(int argc, char *argv[]);
-void simulate();
+void simulate(Cache cache);
+void hit();
+void miss();
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
 void tryReadCache(void *addr);
@@ -59,14 +64,14 @@ int main(int argc, char *argv[])
     // -- if S: tryWriteCache(addr) // kinda the same as L really
     // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
     // ** COUNT HITS AND MISSES AND EVICTIONS!
-    simulate();
+    simulate(cache);
 
     printSummary(hits, misses, evictions);
     freeAllMemory(cache);
     return 0;
 }
 
-void simulate() {
+void simulate(Cache cache) {
     if (traceFilename) {
         FILE *fp;
         char line[MAX_LINE_SIZE];
@@ -90,7 +95,28 @@ void simulate() {
                 getAddressConversion(line, binaryAddress);
                 printf("%s\n", binaryAddress);
                 // we can ignore the size here
-                // free(binaryAddress);
+
+                // okay, so we have the binary rep now in binaryAddress
+                // we need the cache to know how many bits for set and block
+                // m - (s + b) is the tag, held in cache
+                char tag[cache.numTagBits];
+            
+                for (int i = 0; i < cache.numTagBits; i++) {
+                    tag[i] = binaryAddress[i];
+                } // end loop
+
+                char setNum[cache.numSetBits];
+                for (int i = cache.numTagBits, j = 0; j < cache.numSetBits; i++, j++) {
+                    setNum[j] = binaryAddress[i];
+                } // end loop
+
+                printf("tag: %s\nsetnum: %s\n", tag, setNum);
+                // we can snag set bits and convert that to decimal
+                // then we need tag
+                // we look at cache.sets[set decimal]
+                // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
+                // if (tag == tag): hit count++; hit() // conduct hit procedure
+                // if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
             }
                 
 
@@ -102,6 +128,15 @@ void simulate() {
         printf("Something went wrong: trace file name was not given.\n");
     } // end if
 } // end method
+
+
+void hit() {
+
+}
+
+void miss() {
+    // need to increment eviction here if that is needed
+}
 
 /**
  * purpose of this method is to grab the hex address and convert to 
@@ -203,7 +238,7 @@ char * convertHexToBinary(char hex) {
 Cache initCache(int argc, char *argv[]) {
     int opt;
     int numSets = 0;
-    int numSetIndexBits = 0;
+    int numSetBits = 0;
     int numLines = 0;
     int numBlocks = 0;
     int numBlockBits = 0;
@@ -215,8 +250,8 @@ Cache initCache(int argc, char *argv[]) {
         switch(opt) 
         { 
             case 's':
-                numSetIndexBits = atoi(optarg);
-                numSets = pow(2, numSetIndexBits);
+                numSetBits = atoi(optarg);
+                numSets = pow(2, numSetBits);
                 break;
             case 'E': 
                 numLines = atoi(optarg);
@@ -258,7 +293,13 @@ Cache initCache(int argc, char *argv[]) {
         sets[i] = set;
     } // end loop
 
-    Cache cache = {numSets, sets};
+    Cache cache = {
+        numSets, 
+        (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits),
+        numSetBits, 
+        numBlockBits, 
+        sets
+    };
     return cache;
 } // end method
 
