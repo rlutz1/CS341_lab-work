@@ -45,7 +45,7 @@ static int evictions = 0;
 Cache initCache(int argc, char *argv[]);
 void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
-void hit(Line *line);
+void hit(Line *line, Line *allLines, int numLines, int rootIndex);
 void miss(Set set);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
@@ -139,14 +139,7 @@ void simulate(Cache cache) {
                         printf("Got action not defined? %c\n", action);
                         break;
                 } // end switch case
-                
-                // we look at cache.sets[set decimal]
-                // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
-                // if (tag == tag): hit count++; hit() // conduct hit procedure
-                // if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
-            }
-                
-
+            } // end if
         } // end loop
 
         fclose(fp);
@@ -156,7 +149,10 @@ void simulate(Cache cache) {
     } // end if
 } // end method
 
-
+// we look at cache.sets[set decimal]
+// we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
+// if (tag == tag): hit count++; hit() // conduct hit procedure
+// if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
 void lookForData(Cache cache, int setIndex, char *tag) {
     char hitFound = 0;
     Set currSet = *(cache.sets + (setIndex * sizeof(Set)));
@@ -164,7 +160,7 @@ void lookForData(Cache cache, int setIndex, char *tag) {
     for (int i = 0; i < currSet.numLines; i++) {
         Line *line = currSet.lines + (i * sizeof(Line));
         if (strcmp(line -> tag, tag) == 0)  {
-            hits++; hitFound = 1; hit(line);
+            hits++; hitFound = 1; hit(line, currSet.lines, currSet.numLines, i);
             break;
         }
     }
@@ -174,8 +170,18 @@ void lookForData(Cache cache, int setIndex, char *tag) {
     }
 }
 
-void hit(Line *line) {
- 
+void hit(Line *line, Line *allLines, int numLines, int rootIndex) {
+    if ((line -> priority) != 1) { // if == 1, do nothing
+        int oldPriority = line -> priority;
+        (line -> priority) = 1; // change priority of line to 1
+        for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
+            Line *otherLine = allLines + (i * sizeof(Line));
+            if (otherLine != line && (otherLine -> priority) < oldPriority) {
+                (otherLine -> priority)++;
+            } // end if
+        } // end loop
+        maxHeapify(); // root index
+    }
 }
 
 void miss(Set set) {
