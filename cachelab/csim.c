@@ -223,19 +223,45 @@ void maxHeapify(Line *A, int parent, int end) {
 
 void miss(Set set, char *tag) {
     Line *allLines = set.lines;
+    Line currLine;
     int numBlocks = allLines[0].numBlocks;
-    char *blocks = (char *) malloc(numBlocks * sizeof(char));
-    checkNullPtr(blocks);
-    Line newLine = { // just laying out for my note, modify instead
-        tag,
-        1, 
-        1,
-        numBlocks,
-        blocks
-    }
+    for (int i = 0; i < set.numLines; i++) {
+        currLine = allLines[i];// grab the line
+        if (currLine.priority == -1) { // if priority == -1, that means we have an empty slot; we are not concerned with invalidation i guess
+            
+            // increment all other priorities
+            for (int j = 0; j < set.numLines; j++) {
+                if (allLines[j].priority > 0) {
+                    allLines[j].priority++;
+                } // end if
+            } // end loop
+            
+            // update the first empty line found is now saved with this tag in cache
+            currLine.tag = tag;
+            currLine.priority = 1;
+            currLine.valid = 1;
+            // grabbing data implied here, but not actually in this simulation
+            
+            return; // nothing else to do, no eviction, exit the function
+        } // end if
+    } // end loop
 
+    // if we manage to get out of this loop, that means we need to evict.
+    evictions++;// first, remember to increment eviction count
+
+    Line root = allLines[0]; // insert the new tag/data/priority 1 etc as root of heap
+    root.tag = tag;
+    root.priority = 1;
+    root.valid = 1; // this shouldn't change, but keeping here for now
+    // change of data implied
+
+    // increment all lines after priority
+    for (int j = 1; j < set.numLines; j++) {
+        allLines[j].priority++;
+    } // end loop
     
-
+    // fix the heaping
+    maxHeapify(allLines, 0, set.numLines); // root index
 }
 
 /**
