@@ -47,6 +47,7 @@ void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
 void hit(Line *line, Line *allLines, int numLines, int rootIndex);
 void miss(Set set);
+void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
 void tryReadCache(void *addr);
@@ -180,7 +181,37 @@ void hit(Line *line, Line *allLines, int numLines, int rootIndex) {
                 (otherLine -> priority)++;
             } // end if
         } // end loop
-        maxHeapify(); // root index
+        maxHeapify(allLines, rootIndex, numLines); // root index
+    }
+}
+
+void maxHeapify(Line *A, int parent, int end) {
+    int max = parent;
+    int lChild = (2 * parent) + 1;
+    int rChild = (2 * parent) + 2;
+
+    // Line *parentPointer = A + (parent * sizeof(Line));
+    // Line *lChildPointer = A + (lChild * sizeof(Line));
+    // Line *rChildPointer = A + (rChild * sizeof(Line));
+
+    Line parentLine = A[parent];
+    Line lChildLine = A[lChild];
+    Line rChildLine = A[rChild];
+
+    if (lChild < end && (lChildLine.priority) > (parentLine.priority))
+        max = lChild;
+    
+    if (rChild < end && (rChildLine.priority) > (parentLine.priority))
+        max = rChild;
+    
+    if (max != parent) {
+        // Line *temp = A + (max * sizeof(Line));
+        // A + (parent * sizeof(Line)) = A + (max * sizeof(Line));
+        // A + (max * sizeof(Line)) = parentPointer;
+        Line temp = A[parent];
+        A[parent] = A[max];
+        A[max] = temp;
+        maxHeapify(A, max, end);
     }
 }
 
