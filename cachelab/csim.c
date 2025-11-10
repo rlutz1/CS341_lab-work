@@ -46,7 +46,7 @@ Cache *initCache(int argc, char *argv[]);
 void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
 void hit(Line line, Line *allLines, int numLines, int rootIndex);
-void miss(Set set, char *tag);
+void miss(Set *set, char *tag);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
@@ -103,14 +103,15 @@ void simulate(Cache cache) {
                 // okay, so we have the binary rep now in binaryAddress
                 // we need the cache to know how many bits for tag, set, and block offset
                 
-                char *tag = (char *) malloc(cache.numTagBits * sizeof(char)); // + 1?
-                checkNullPtr(tag);
+                // char *tag = (char *) malloc(cache.numTagBits * sizeof(char)); // + 1?
+                // checkNullPtr(tag);
+                char tag[cache.numTagBits];
                 // grab the tag from the binary address
                 for (int i = 0; i < cache.numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
                 tag[cache.numTagBits] = '\0'; // enforce null for ease of printing
-                printf("kdnsds: %s\n", tag);
+                // printf("kdnsds: %s\n", tag);
                 // grab the set bits
                 // TODO: get rid of this char[] and just compute the decimal in 1 fell swoop?
                 char setNum[cache.numSetBits];
@@ -164,25 +165,27 @@ void lookForData(Cache cache, int setIndex, char *tag) {
     Set currSet = cache.sets[setIndex];
     // printf("curr set hit\n");
     // printf("sakdnasjdbsak");
-    printf("%s\n\n", tag);
+    printf("tag we're searching for: %s\n", tag);
     for (int i = 0; i < currSet.numLines; i++) {
-        Line something = currSet.lines[i]; //+ (i * sizeof(Line));
-        printf("what the fuck? %d, %s\n", something.valid, something.tag);
-        if (something.valid == 1 && strcmp(something.tag, tag) == 0)  {
-            hits++; hit(something, currSet.lines, currSet.numLines, i);
-            free(tag);
+        Line currLine = currSet.lines[i]; //+ (i * sizeof(Line));
+        printf("looking for data, set %d: %d, %s\n", setIndex, currLine.valid, currLine.tag);
+        if (currLine.valid == 1 && strcmp(currLine.tag, tag) == 0)  {
+            printf("HIT!\n");
+            hits++; hit(currLine, currSet.lines, currSet.numLines, i);
+            // free(tag);
             return;
         }
     }
     // made it this far, must have been a miss
-    misses++; miss(currSet, tag);
+    printf("MISS!\n");
+    misses++; miss(&currSet, tag);
 
 }
 
-void hit(Line something, Line *allLines, int numLines, int rootIndex) {
-    if ((something.priority) != 1) { // if == 1, do nothing
-        int oldPriority = something.priority;
-        (something.priority) = 1; // change priority of line to 1
+void hit(Line currLine, Line *allLines, int numLines, int rootIndex) {
+    if ((currLine.priority) != 1) { // if == 1, do nothing
+        int oldPriority = currLine.priority;
+        (currLine.priority) = 1; // change priority of line to 1
         for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
             Line otherLine = allLines[i];
             if (i != rootIndex && (otherLine.priority) < oldPriority) {
@@ -229,26 +232,28 @@ void maxHeapify(Line *A, int parent, int end) {
 // short numBlocks;
 // char *data;
 
-void miss(Set set, char *tag) {
-    Line *allLines = set.lines;
+void miss(Set *set, char *tag) {
+    Line *allLines = (*set).lines;
     Line currLine;
     // int numBlocks = allLines[0].numBlocks;
-    for (int i = 0; i < set.numLines; i++) {
+    for (int i = 0; i < (*set).numLines; i++) {
         currLine = allLines[i];// grab the line
         if (currLine.priority == -1) { // if priority == -1, that means we have an empty slot; we are not concerned with invalidation i guess
             printf("priority -1 is catching \n");
             // increment all other priorities
-            for (int j = 0; j < set.numLines; j++) {
-                if (allLines[j].priority > 0) {
-                    allLines[j].priority++;
+            for (int j = 0; j < (*set).numLines; j++) {
+                if ((*set).lines[j].priority > 0) {
+                    (*set).lines[j].priority++;
                 } // end if
             } // end loop
             
             // update the first empty line found is now saved with this tag in cache
             strcpy(currLine.tag, tag);
             printf("%s\n", currLine.tag);
-            currLine.priority = 1;
-            currLine.valid = 1;
+            (*set).lines[i].priority = 1;
+            (*set).lines[i].valid = 1;
+
+            printf("priority and valid after change: %d, %d\n", (*set).lines[i].priority, (*set).lines[i].valid);
             // grabbing data implied here, but not actually in this simulation
             
             return; // nothing else to do, no eviction, exit the function
@@ -268,14 +273,14 @@ void miss(Set set, char *tag) {
     // change of data implied
 
     // increment all lines after priority
-    for (int j = 1; j < set.numLines; j++) {
+    for (int j = 1; j < (*set).numLines; j++) {
         allLines[j].priority++;
     } // end loop
     
     // fix the heaping
-    maxHeapify(allLines, 0, set.numLines); // root index
+    maxHeapify(allLines, 0, (*set).numLines); // root index
 
-    free(tag);
+    // free(tag);
 }
 
 /**
