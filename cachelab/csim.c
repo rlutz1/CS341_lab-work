@@ -45,7 +45,7 @@ static int evictions = 0;
 Cache *initCache(int argc, char *argv[]);
 void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
-void hit(Line *line, Line *allLines, int numLines, int rootIndex);
+void hit(Line line, Line *allLines, int numLines, int rootIndex);
 void miss(Set set, char *tag);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 {    // malloc you fucking idiot
     // (1) extract all arguments and values 
     Cache *cache = initCache(argc, argv);
-    // printCache(cache);
+    // printCache(*cache);
 
     // (2) go through lines and attempt to interact through cache
     // -- if L: tryReadCache(addr)
@@ -110,7 +110,7 @@ void simulate(Cache cache) {
                     tag[i] = binaryAddress[i];
                 } // end loop
                 tag[cache.numTagBits] = '\0'; // enforce null for ease of printing
-                // printf("%s\n", tag);
+                printf("kdnsds: %s\n", tag);
                 // grab the set bits
                 // TODO: get rid of this char[] and just compute the decimal in 1 fell swoop?
                 char setNum[cache.numSetBits];
@@ -164,11 +164,12 @@ void lookForData(Cache cache, int setIndex, char *tag) {
     Set currSet = cache.sets[setIndex];
     // printf("curr set hit\n");
     // printf("sakdnasjdbsak");
+    printf("%s\n\n", tag);
     for (int i = 0; i < currSet.numLines; i++) {
-        Line *line = currSet.lines + (i * sizeof(Line));
-        printf("%d, %s\n", line -> valid, line -> tag);
-        if (line -> valid == 1 && strcmp(line -> tag, tag) == 0)  {
-            hits++; hit(line, currSet.lines, currSet.numLines, i);
+        Line something = currSet.lines[i]; //+ (i * sizeof(Line));
+        printf("what the fuck? %d, %s\n", something.valid, something.tag);
+        if (something.valid == 1 && strcmp(something.tag, tag) == 0)  {
+            hits++; hit(something, currSet.lines, currSet.numLines, i);
             free(tag);
             return;
         }
@@ -178,14 +179,14 @@ void lookForData(Cache cache, int setIndex, char *tag) {
 
 }
 
-void hit(Line *line, Line *allLines, int numLines, int rootIndex) {
-    if ((line -> priority) != 1) { // if == 1, do nothing
-        int oldPriority = line -> priority;
-        (line -> priority) = 1; // change priority of line to 1
+void hit(Line something, Line *allLines, int numLines, int rootIndex) {
+    if ((something.priority) != 1) { // if == 1, do nothing
+        int oldPriority = something.priority;
+        (something.priority) = 1; // change priority of line to 1
         for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
-            Line *otherLine = allLines + (i * sizeof(Line));
-            if (otherLine != line && (otherLine -> priority) < oldPriority) {
-                (otherLine -> priority)++;
+            Line otherLine = allLines[i];
+            if (i != rootIndex && (otherLine.priority) < oldPriority) {
+                otherLine.priority++;
             } // end if
         } // end loop
         maxHeapify(allLines, rootIndex, numLines); // root index
@@ -244,7 +245,7 @@ void miss(Set set, char *tag) {
             } // end loop
             
             // update the first empty line found is now saved with this tag in cache
-            currLine.tag = tag;
+            strcpy(currLine.tag, tag);
             printf("%s\n", currLine.tag);
             currLine.priority = 1;
             currLine.valid = 1;
@@ -261,7 +262,7 @@ void miss(Set set, char *tag) {
 
     // Line root = ; 
     free(allLines[0].tag); // free old tag memory
-    allLines[0].tag = tag; // insert the new tag/data/priority 1 etc as root of heap
+    strcpy(allLines[0].tag, tag); // insert the new tag/data/priority 1 etc as root of heap
     allLines[0].priority = 1;
     allLines[0].valid = 1; // this shouldn't change, but keeping here for now
     // change of data implied
@@ -273,6 +274,8 @@ void miss(Set set, char *tag) {
     
     // fix the heaping
     maxHeapify(allLines, 0, set.numLines); // root index
+
+    free(tag);
 }
 
 /**
@@ -420,8 +423,9 @@ Cache *initCache(int argc, char *argv[]) {
         for (int j = 0; j < numLines; j++) {
             char *blocks = (char *) malloc(numBlocks * sizeof(char));
             checkNullPtr(blocks);
-
-            Line line = {0, 0, -1, numBlocks, blocks}; // maybe fine?
+            char *tag = (char *) malloc((NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits) * sizeof(char));
+            checkNullPtr(tag);
+            Line line = {tag, 0, -1, numBlocks, blocks}; // maybe fine?
             lines[j] = line;
           //  printf("set %d line %d", i, j);
         } // end loop
