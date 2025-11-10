@@ -42,7 +42,7 @@ static int misses = 0;
 static int evictions = 0;
 
 // method declarations
-Cache initCache(int argc, char *argv[]);
+Cache *initCache(int argc, char *argv[]);
 void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
 void hit(Line *line, Line *allLines, int numLines, int rootIndex);
@@ -53,13 +53,13 @@ void getAddressConversion(char *line, char *binaryAddress);
 void tryReadCache(void *addr);
 void tryWriteCache(void *addr);
 void checkNullPtr(void *ptr);
-void freeAllMemory(Cache cache);
+void freeAllMemory(Cache *cache);
 void printCache(Cache cache);
 
 int main(int argc, char *argv[])
 {    // malloc you fucking idiot
     // (1) extract all arguments and values 
-    Cache cache = initCache(argc, argv);
+    Cache *cache = initCache(argc, argv);
     // printCache(cache);
 
     // (2) go through lines and attempt to interact through cache
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     // -- if S: tryWriteCache(addr) // kinda the same as L really
     // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
     // ** COUNT HITS AND MISSES AND EVICTIONS!
-    simulate(cache);
+    simulate(*cache);
 
     printSummary(hits, misses, evictions);
     freeAllMemory(cache);
@@ -87,28 +87,30 @@ void simulate(Cache cache) {
 
         while (fgets(line, sizeof(line), fp)) {
             // printf("%s", line);
-
+           
             if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
-                printf("%s", line);
+                printf("%s\n", line);
+                
                 // we need to (1) snag the argument
                 char action = line[ACTION_INDEX];
-                printf("%c\n", action);
+                // printf("%c\n", action);
                 // (2) grab the hex address and convert to binary
                 char binaryAddress[NUM_BITS_IN_ADDRESS] = {0};
                 getAddressConversion(line, binaryAddress);
-                printf("%s\n", binaryAddress);
+                // printf("%s\n", binaryAddress);
                 // we can ignore the size here
 
                 // okay, so we have the binary rep now in binaryAddress
                 // we need the cache to know how many bits for tag, set, and block offset
                 
-                char tag[cache.numTagBits];
+                char *tag = (char *) malloc(cache.numTagBits * sizeof(char)); // + 1?
+                checkNullPtr(tag);
                 // grab the tag from the binary address
                 for (int i = 0; i < cache.numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
                 tag[cache.numTagBits] = '\0'; // enforce null for ease of printing
-
+                // printf("%s\n", tag);
                 // grab the set bits
                 // TODO: get rid of this char[] and just compute the decimal in 1 fell swoop?
                 char setNum[cache.numSetBits];
@@ -117,7 +119,7 @@ void simulate(Cache cache) {
                 } // end loop
                 setNum[cache.numSetBits] = '\0'; // enforce null for ease of printing
 
-                printf("tag: %s\nsetnum: %s\n", tag, setNum);
+                // printf("tag: %s\nsetnum: %s\n", tag, setNum);
                 // we can snag set bits and convert that to decimal
                 int setIndex = 0;
                 for (int i = (cache.numSetBits - 1), j = 0; i > -1; i--, j++) {
@@ -125,7 +127,7 @@ void simulate(Cache cache) {
                         setIndex += pow(2, j);
                 } // end loop
 
-                printf("set index: %d\n", setIndex);
+                // printf("set index: %d\n", setIndex);
 
                 switch (action) {
                     case 'L':
@@ -140,6 +142,10 @@ void simulate(Cache cache) {
                         printf("Got action not defined? %c\n", action);
                         break;
                 } // end switch case
+                // for (int i = 0; i < cache.sets[setIndex].numLines; i++) {
+                //     printf("%s\n", cache.sets[setIndex].lines[i].tag);
+                // }
+                
             } // end if
         } // end loop
 
@@ -155,20 +161,21 @@ void simulate(Cache cache) {
 // if (tag == tag): hit count++; hit() // conduct hit procedure
 // if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
 void lookForData(Cache cache, int setIndex, char *tag) {
-    char hitFound = 0;
-    Set currSet = *(cache.sets + (setIndex * sizeof(Set)));
+    Set currSet = cache.sets[setIndex];
+    // printf("curr set hit\n");
     // printf("sakdnasjdbsak");
     for (int i = 0; i < currSet.numLines; i++) {
         Line *line = currSet.lines + (i * sizeof(Line));
+        printf("%d, %s\n", line -> valid, line -> tag);
         if (line -> valid == 1 && strcmp(line -> tag, tag) == 0)  {
-            hits++; hitFound = 1; hit(line, currSet.lines, currSet.numLines, i);
-            break;
+            hits++; hit(line, currSet.lines, currSet.numLines, i);
+            free(tag);
+            return;
         }
     }
+    // made it this far, must have been a miss
+    misses++; miss(currSet, tag);
 
-    if (!hitFound) {
-        misses++; miss(currSet, tag);
-    }
 }
 
 void hit(Line *line, Line *allLines, int numLines, int rootIndex) {
@@ -224,11 +231,11 @@ void maxHeapify(Line *A, int parent, int end) {
 void miss(Set set, char *tag) {
     Line *allLines = set.lines;
     Line currLine;
-    int numBlocks = allLines[0].numBlocks;
+    // int numBlocks = allLines[0].numBlocks;
     for (int i = 0; i < set.numLines; i++) {
         currLine = allLines[i];// grab the line
         if (currLine.priority == -1) { // if priority == -1, that means we have an empty slot; we are not concerned with invalidation i guess
-            
+            printf("priority -1 is catching \n");
             // increment all other priorities
             for (int j = 0; j < set.numLines; j++) {
                 if (allLines[j].priority > 0) {
@@ -238,6 +245,7 @@ void miss(Set set, char *tag) {
             
             // update the first empty line found is now saved with this tag in cache
             currLine.tag = tag;
+            printf("%s\n", currLine.tag);
             currLine.priority = 1;
             currLine.valid = 1;
             // grabbing data implied here, but not actually in this simulation
@@ -246,13 +254,16 @@ void miss(Set set, char *tag) {
         } // end if
     } // end loop
 
+    printf("eviction needed\n");
+
     // if we manage to get out of this loop, that means we need to evict.
     evictions++;// first, remember to increment eviction count
 
-    Line root = allLines[0]; // insert the new tag/data/priority 1 etc as root of heap
-    root.tag = tag;
-    root.priority = 1;
-    root.valid = 1; // this shouldn't change, but keeping here for now
+    // Line root = ; 
+    free(allLines[0].tag); // free old tag memory
+    allLines[0].tag = tag; // insert the new tag/data/priority 1 etc as root of heap
+    allLines[0].priority = 1;
+    allLines[0].valid = 1; // this shouldn't change, but keeping here for now
     // change of data implied
 
     // increment all lines after priority
@@ -361,7 +372,7 @@ char * convertHexToBinary(char hex) {
 /**
  * initialize the cache based on arguments passed.
  */
-Cache initCache(int argc, char *argv[]) {
+Cache *initCache(int argc, char *argv[]) {
     int opt;
     int numSets = 0;
     int numSetBits = 0;
@@ -419,13 +430,19 @@ Cache initCache(int argc, char *argv[]) {
         sets[i] = set;
     } // end loop
 
-    Cache cache = {
-        numSets, 
-        (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits),
-        numSetBits, 
-        numBlockBits, 
-        sets
-    };
+    Cache *cache = (Cache *) malloc(sizeof(Cache));
+    (*cache).numSets = numSets;
+    (*cache).numTagBits = (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits);
+    (*cache).numSetBits = numSetBits;
+    (*cache).numBlockBits = numBlockBits;
+    (*cache).sets = sets;
+    // cache = {
+    //     numSets, 
+    //     (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits),
+    //     numSetBits, 
+    //     numBlockBits, 
+    //     sets
+    // };
     // printf("%d\n", cache.numTagBits);
     return cache;
 } // end method
@@ -443,21 +460,23 @@ void checkNullPtr(void *ptr) {
  * + lines
  * + blocks
  */
-void freeAllMemory(Cache cache) {
+void freeAllMemory(Cache *cache) {
     printf("Freeing memory... \n"); 
 
-    for (int i = 0; i < cache.numSets; i++) {
+    for (int i = 0; i < (*cache).numSets; i++) {
 
-        Set set = cache.sets[i];
+        Set set = (*cache).sets[i];
         Line *lines = set.lines;
         for (int j = 0; j < set.numLines; j++) {
             // Line line = set.lines[j];
             Line line = lines[j];
             free(line.data);
+            free(line.tag);
         } // end loop
         free(lines);
     }
-    free(cache.sets);
+    free((*cache).sets);
+    free(cache);
 } // end method
 
 /**
