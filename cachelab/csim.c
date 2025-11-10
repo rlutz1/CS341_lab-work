@@ -46,7 +46,7 @@ Cache initCache(int argc, char *argv[]);
 void simulate(Cache cache);
 void lookForData(Cache cache, int setIndex, char *tag);
 void hit(Line *line, Line *allLines, int numLines, int rootIndex);
-void miss(Set set);
+void miss(Set set, char *tag);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
@@ -160,14 +160,14 @@ void lookForData(Cache cache, int setIndex, char *tag) {
     // printf("sakdnasjdbsak");
     for (int i = 0; i < currSet.numLines; i++) {
         Line *line = currSet.lines + (i * sizeof(Line));
-        if (strcmp(line -> tag, tag) == 0)  {
+        if (line -> valid == 1 && strcmp(line -> tag, tag) == 0)  {
             hits++; hitFound = 1; hit(line, currSet.lines, currSet.numLines, i);
             break;
         }
     }
 
     if (!hitFound) {
-        misses++; miss(currSet);
+        misses++; miss(currSet, tag);
     }
 }
 
@@ -215,8 +215,27 @@ void maxHeapify(Line *A, int parent, int end) {
     }
 }
 
-void miss(Set set) {
-    // need to increment eviction here if that is needed
+// char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
+// char valid; // 0 or 1
+// short priority; // for mimicking LRU functionality. likely never more than short
+// short numBlocks;
+// char *data;
+
+void miss(Set set, char *tag) {
+    Line *allLines = set.lines;
+    int numBlocks = allLines[0].numBlocks;
+    char *blocks = (char *) malloc(numBlocks * sizeof(char));
+    checkNullPtr(blocks);
+    Line newLine = { // just laying out for my note, modify instead
+        tag,
+        1, 
+        1,
+        numBlocks,
+        blocks
+    }
+
+    
+
 }
 
 /**
