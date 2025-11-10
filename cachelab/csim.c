@@ -481,32 +481,12 @@ void checkNullPtr(void *ptr) {
 void freeAllMemory(Cache *cache) {
     printf("Freeing memory... \n"); 
 
-    int counter = 0;
+    short counter = 0;
     while (freeMemoryList[counter]) {
+        // printf("freeing address %p\n", freeMemoryList[counter]); // confirmed, is running correctly
         free(freeMemoryList[counter++]);
     } // end loop
 
-    // for (int i = 0; i < (*cache).numSets; i++) {
-
-    //     // Set set = (*cache).sets[i];
-    //     // Line *lines = set.lines;
-    //     for (int j = 0; j < (*cache).sets[i].numLines; j++) {
-    //         // Line line = set.lines[j];
-    //         // Line line = lines[j];
-    //         // free((*cache).sets[i].lines[j].data);
-    //         // printf("freed data\n");
-    //         free((*cache).sets[i].lines[j].tag); // okay this is problematic
-    //         printf("freed tag\n");
-    //     } // end loop
-
-
-    //     free((*cache).sets[i].lines); // and this is problematic
-    //     printf("freed lines\n");
-    // }
-    // free((*cache).sets);
-    // printf("freed sets\n");
-    // free(cache);
-    // printf("freed cache\n");
 } // end method
 
 /**
