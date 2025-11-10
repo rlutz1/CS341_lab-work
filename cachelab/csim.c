@@ -44,6 +44,7 @@ static int evictions = 0;
 // method declarations
 Cache initCache(int argc, char *argv[]);
 void simulate(Cache cache);
+void lookForData(Cache cache, int setIndex, char *tag);
 void hit(Line *line);
 void miss(Set set);
 char *convertHexToBinary(char hex);
@@ -99,7 +100,7 @@ void simulate(Cache cache) {
 
                 // okay, so we have the binary rep now in binaryAddress
                 // we need the cache to know how many bits for tag, set, and block offset
-               
+                
                 char tag[cache.numTagBits];
                 // grab the tag from the binary address
                 for (int i = 0; i < cache.numTagBits; i++) {
@@ -124,20 +125,21 @@ void simulate(Cache cache) {
                 } // end loop
 
                 printf("set index: %d\n", setIndex);
-                char hitFound = 0;
-                Set currSet = *(cache.sets + (setIndex * sizeof(Set)));
-                // printf("sakdnasjdbsak");
-                for (int i = 0; i < currSet.numLines; i++) {
-                    Line *line = currSet.lines + (i * sizeof(Line));
-                    if (strcmp(line -> tag, tag) == 0)  {
-                        hits++; hitFound = 1; hit(line);
-                        break;
-                    }
-                }
 
-                if (!hitFound) {
-                    misses++; miss(currSet);
-                }
+                switch (action) {
+                    case 'L':
+                    case 'S':
+                        lookForData(cache, setIndex, tag);
+                        break;
+                    case 'M':
+                        lookForData(cache, setIndex, tag);
+                        lookForData(cache, setIndex, tag);
+                        break;
+                    default:
+                        printf("Got action not defined? %c\n", action);
+                        break;
+                } // end switch case
+                
                 // we look at cache.sets[set decimal]
                 // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
                 // if (tag == tag): hit count++; hit() // conduct hit procedure
@@ -155,8 +157,25 @@ void simulate(Cache cache) {
 } // end method
 
 
-void hit(Line *line) {
+void lookForData(Cache cache, int setIndex, char *tag) {
+    char hitFound = 0;
+    Set currSet = *(cache.sets + (setIndex * sizeof(Set)));
+    // printf("sakdnasjdbsak");
+    for (int i = 0; i < currSet.numLines; i++) {
+        Line *line = currSet.lines + (i * sizeof(Line));
+        if (strcmp(line -> tag, tag) == 0)  {
+            hits++; hitFound = 1; hit(line);
+            break;
+        }
+    }
 
+    if (!hitFound) {
+        misses++; miss(currSet);
+    }
+}
+
+void hit(Line *line) {
+ 
 }
 
 void miss(Set set) {
