@@ -176,41 +176,26 @@ void printSet(Set set, char *tag) {
     }
 }
 
-// we look at cache.sets[set decimal]
-// we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
-// if (tag == tag): hit count++; hit() // conduct hit procedure
-// if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
-
-// 
+/**
+ * @author Roxanne Lutz
+ * just a simple method to use to bundle up the search for a hit.
+ * and handle a miss if occurrs.
+ */
 void lookForData(int setIndex, char *tag, char *fileLine) {
     Set currSet = (*cache).sets[setIndex];
-    // printf("curr set hit\n");
-    // printf("sakdnasjdbsak");
-    // printf("tag we're searching for: %s\n", tag);
-    for (int i = 0; i < currSet.numLines; i++) {
-        Line currLine = currSet.lines[i]; //+ (i * sizeof(Line));
-        // printf("looking for data, set %d: %d, %d, %s\n", setIndex, currLine.valid, currLine.priority, currLine.tag);
-        // if (currLine.valid == 1 && strcmp(currLine.tag, tag) == 0)  {
-        if (currLine.valid == 1 && equalTags(currLine.tag, tag, (*cache).numTagBits) == 0)  {
-            
-            hits++; hit(currSet.lines, currSet.numLines, i, fileLine);
-            // printf("set %d\n", setIndex);
-            // printSet(currSet, tag);
-            // free(tag);
-            return;
-        }
-    }
-    // // made it this far, must have been a miss
-    // printf("was looking for but didnt find: \n%s\n in set %d ", tag, setIndex);
-    // printf("current state of set\n");
-    
-    // printf("\n\n");
-    
-    misses++; miss(currSet.lines, currSet.numLines, tag, fileLine);
-    // printf("set %d\n", setIndex);
-    // printSet(currSet, tag);
+    Line currLine;
 
-}
+    for (int i = 0; i < currSet.numLines; i++) { // iterate through the lines
+        currLine = currSet.lines[i];
+        // if a valid line and tags are the same, huzzah, a hit!
+        if (currLine.valid == 1 && strcmp(currLine.tag, tag) == 0)  {
+            hits++; hit(currSet.lines, currSet.numLines, i, fileLine); return;
+        }
+    } // end loop
+
+    // if we made it this far, it must be a miss
+    misses++; miss(currSet.lines, currSet.numLines, tag, fileLine);
+} // end method
 
 /**
  * @author Roxanne Lutz
