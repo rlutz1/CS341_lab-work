@@ -42,6 +42,7 @@ static int RLhits = 0;
 static int RLmisses = 0;
 static int RLevictions = 0;
 static void *freeMemoryList[100] = {0};
+static short freedomCounter = 0;
 
 // method declarations
 Cache *initCache(int argc, char *argv[]);
@@ -54,7 +55,8 @@ char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
 
 void checkNullPtr(void *ptr);
-void freeAllMemory(Cache *cache);
+void *getMemory(short howMany, short size);
+void freeAllMemory();
 void printCache(Cache cache);
 
 int main(int argc, char *argv[])
@@ -196,8 +198,8 @@ void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
             if (VERBOSE)
                 printf("%s -- hit \n", fileLine);
             RLhits++; hit(&currLine, currSet.lines, currSet.numLines, i);
-            printf("set %d\n", setIndex);
-            printSet(currSet, tag);
+            // printf("set %d\n", setIndex);
+            // printSet(currSet, tag);
             // free(tag);
             return;
         }
@@ -206,12 +208,12 @@ void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
     // printf("was looking for but didnt find: \n%s\n in set %d ", tag, setIndex);
     // printf("current state of set\n");
     
-    printf("\n\n");
+    // printf("\n\n");
     if (VERBOSE)
         printf("%s -- miss\n", fileLine);
     RLmisses++; miss(&currSet, tag, fileLine);
-    printf("set %d\n", setIndex);
-    printSet(currSet, tag);
+    // printf("set %d\n", setIndex);
+    // printSet(currSet, tag);
 
 }
 
@@ -364,56 +366,8 @@ void getAddressConversion(char *line, char *binaryAddress) {
 } // end method
 
 /**
- * super quick and dirty hex conversion
- */
-char * convertHexToBinary(char hex) {
-    switch (hex) { // gonna do a switch case because i'm very naughty
-            case '0':
-                return "0000"; break;
-            case '1':
-                return "0001"; break;
-            case '2': //
-                return "0010"; break;
-            case '3':
-                return "0011"; break;
-            case '4':
-                return "0100"; break;
-            case '5':
-                return "0101"; break;
-            case '6':
-                return "0110"; break;
-            case '7':
-                return "0111"; break;
-            case '8':
-                return "1000"; break;
-            case '9':
-                return "1001"; break;
-            case 'A':
-            case 'a':
-                return "1010"; break;
-            case 'B':
-            case 'b':
-                return "1011"; break;
-            case 'C':
-            case 'c':
-                return "1100"; break;
-            case 'D':
-            case 'd':
-                return "1101"; break;
-            case 'E':
-            case 'e':
-                return "1110"; break;
-            case 'F':
-            case 'f':
-                return "1111"; break;
-                
-        } // end return case;
-        printf("Something went wrong: received an undefined hex value: %c", hex);
-        return 0;
-} // end method
-
-/**
- * initialize the cache based on arguments passed.
+ * @author Roxanne Lutz
+ * parse and then initialize the cache based on arguments passed.
  */
 Cache *initCache(int argc, char *argv[]) {
     int opt;
@@ -455,80 +409,113 @@ Cache *initCache(int argc, char *argv[]) {
         } // end switch case
     }  // end loop
 
-    int freedomCounter = 0;
-    // initialize the cache based on passed paramaters
-    Set *sets = (Set *) malloc(numSets * sizeof(Set));
-    checkNullPtr(sets);
-    freeMemoryList[freedomCounter++] = sets;
+    Set *sets = (Set *) getMemory(numSets, sizeof(Set)); // init the set
+    short numTagBits = NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits; // calculate the number of tag bits needed
 
     for (int i = 0; i < numSets; i++) {
-
-        Line *lines = (Line *) malloc(numLines * sizeof(Line));
-        checkNullPtr(lines);
-        freeMemoryList[freedomCounter++] = lines;
+        Line *lines = (Line *) getMemory(numLines, sizeof(Line)); // create a line pointer for all lines in set
 
         for (int j = 0; j < numLines; j++) {
-            // char *blocks = (char *) malloc(numBlocks * sizeof(char)); // implied if we were getting data
-            // checkNullPtr(blocks);
+            char *tag = (char *) getMemory(numTagBits + 1, sizeof(char)); // create a tag for every line
 
-            char *tag = (char *) malloc((NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits) * sizeof(char) + 1);
-            checkNullPtr(tag);
-            freeMemoryList[freedomCounter++] = tag;
-
-            Line line = {tag, 0, -1, numBlocks, 0}; // maybe fine?
-            lines[j] = line;
-          //  printf("set %d line %d", i, j);
+            Line line = {tag, 0, -1, numBlocks, 0}; // init with: tag, valid = 0, priority = -1, numblocks, and null block ptr for data space
+            lines[j] = line; // and line to appropriate slot
         } // end loop
 
-        Set set = {numLines, lines};
-        sets[i] = set;
+        Set set = {numLines, lines}; // initialize this set
+        sets[i] = set; // add to the set list
     } // end loop
 
-    Cache *cache = (Cache *) malloc(sizeof(Cache));
-    checkNullPtr(cache);
-    freeMemoryList[freedomCounter++] = cache;
+    Cache *cache = (Cache *) getMemory(1, sizeof(Cache)); // initialize the parent cache ptr and memory
 
+    // initialize all fields
     (*cache).numSets = numSets;
-    (*cache).numTagBits = (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits);
+    (*cache).numTagBits = numTagBits;
     (*cache).numSetBits = numSetBits;
     (*cache).numBlockBits = numBlockBits;
     (*cache).sets = sets;
-    // cache = {
-    //     numSets, 
-    //     (NUM_BITS_IN_ADDRESS - numSetBits - numBlockBits),
-    //     numSetBits, 
-    //     numBlockBits, 
-    //     sets
-    // };
-    // printf("%d\n", cache.numTagBits);
-    return cache;
+
+    return cache; // return parent cache ptr
 } // end method
 
+/**
+ * @author Roxanne Lutz
+ * VERY quick and dirty hex conversion method. 
+ * this is hardcoded for ease of use.
+ */
+char *convertHexToBinary(char hex) {
+    switch (hex) { 
+            case '0': return "0000"; break;
+            case '1': return "0001"; break;
+            case '2': return "0010"; break;
+            case '3': return "0011"; break;
+            case '4': return "0100"; break;
+            case '5': return "0101"; break;
+            case '6': return "0110"; break;
+            case '7': return "0111"; break;
+            case '8': return "1000"; break;
+            case '9': return "1001"; break;
+            case 'A':
+            case 'a': return "1010"; break;
+            case 'B':
+            case 'b': return "1011"; break;
+            case 'C':
+            case 'c': return "1100"; break;
+            case 'D':
+            case 'd': return "1101"; break;
+            case 'E':
+            case 'e': return "1110"; break;
+            case 'F':
+            case 'f': return "1111"; break;
+        } // end switch case;
+        printf("Something went wrong: received an undefined hex value: %c", hex);
+        return 0;
+} // end method
+
+/**
+ * @author Roxanne Lutz
+ * simple utility method to check for nulls and 
+ * free upon exit. 
+ */
 void checkNullPtr(void *ptr) {
     if (!ptr) {
-        printf("Null pointer returned by malloc.\n");
-        exit(2);
+        printf("Null pointer returned by malloc. Exiting.\n");
+        freeAllMemory();
+        exit(-1);
     } // end if
 } // end method
 
 /**
- * need to ensure freeing of all malloc'd memory upon program exit:
- * + sets
- * + lines
- * + blocks
+ * @author Roxanne Lutz
+ * method to malloc a ptr dynamically, check for null,
+ * and add to a list keeping track of pointers to free on exit.
+ * just makes my life less complicated.
  */
-void freeAllMemory(Cache *cache) {
-    printf("Freeing memory... \n"); 
-
-    short counter = 0;
-    while (freeMemoryList[counter]) {
-        // printf("freeing address %p\n", freeMemoryList[counter]); // confirmed, is running correctly
-        free(freeMemoryList[counter++]);
-    } // end loop
-
+void *getMemory(short howMany, short size) {
+    void *ptr = malloc(howMany * size);
+    checkNullPtr(ptr);
+    freeMemoryList[freedomCounter++] = ptr;
+    return ptr;   
 } // end method
 
 /**
+ * @author Roxanne Lutz
+ * need to ensure freeing of all malloc'd memory upon program exit.
+ * free memory list is only really used when initializing the cache.
+ * this is simply to make dev life easier in making sure to add things that 
+ * need to live through the program's life that i need to make sure to 
+ * free upon completion.
+ */
+void freeAllMemory() {
+    // printf("Freeing memory... \n"); 
+    short counter = 0;
+    while (freeMemoryList[counter]) {
+        free(freeMemoryList[counter++]);
+    } // end loop
+} // end method
+
+/**
+ * @author Roxanne Lutz
  * method for printing cache for debugging purposes only.
  */
 void printCache(Cache cache) {
