@@ -42,14 +42,13 @@ static char *traceFilename = 0;
 static int hits = 0;
 static int misses = 0;
 static int evictions = 0;
-static void *freeMemoryList[200] = {0};
-static short freedomCounter = 0;
+static Cache * cache;
 
 // method declarations
 Cache *initCache(int argc, char *argv[]);
-void simulate(Cache *cache);
-void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine);
-void hit(Line *line, Line *allLines, int numLines, int rootIndex, char *fileLine);
+void simulate();
+void lookForData(int setIndex, char *tag, char *fileLine);
+void hit(Line *allLines, int numLines, int lineUpdateIndex, char *fileLine);
 void miss(Line *allLines, short numLines, char *tag, char *fileLine);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
@@ -63,17 +62,17 @@ void printCache(Cache cache);
 int main(int argc, char *argv[]) { 
     // extract all arguments and values, init the cache 
     // note: 2 + (numSets) + (numLines * numSets) = size of free mem array if that route chosen
-    Cache *cache = initCache(argc, argv);
+    cache = initCache(argc, argv);
 
     // go through lines and simulate cache
-    simulate(cache);
+    simulate();
 
     printSummary(hits, misses, evictions);
-    freeAllMemory(cache);
+    freeAllMemory();
     return 0;
 } // end main method
 
-void simulate(Cache *cache) {
+void simulate() {
     if (traceFilename) {
         FILE *fp;
         char line[MAX_LINE_SIZE];
@@ -133,11 +132,11 @@ void simulate(Cache *cache) {
                 switch (action) {
                     case 'L':
                     case 'S':
-                        lookForData(cache, setIndex, tag, line);
+                        lookForData(setIndex, tag, line);
                         break;
                     case 'M':
-                        lookForData(cache, setIndex, tag, line);
-                        lookForData(cache, setIndex, tag, line);
+                        lookForData(setIndex, tag, line);
+                        lookForData(setIndex, tag, line);
                         break;
                     default:
                         printf("Got action not defined? %c\n", action);
@@ -181,7 +180,9 @@ void printSet(Set set, char *tag) {
 // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
 // if (tag == tag): hit count++; hit() // conduct hit procedure
 // if we look through all lines an no dice: missCount++ miss()  // call miss procedure 
-void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
+
+// 
+void lookForData(int setIndex, char *tag, char *fileLine) {
     Set currSet = (*cache).sets[setIndex];
     // printf("curr set hit\n");
     // printf("sakdnasjdbsak");
@@ -192,7 +193,7 @@ void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
         // if (currLine.valid == 1 && strcmp(currLine.tag, tag) == 0)  {
         if (currLine.valid == 1 && equalTags(currLine.tag, tag, (*cache).numTagBits) == 0)  {
             
-            hits++; hit(&currLine, currSet.lines, currSet.numLines, i, fileLine);
+            hits++; hit(currSet.lines, currSet.numLines, i, fileLine);
             // printf("set %d\n", setIndex);
             // printSet(currSet, tag);
             // free(tag);
@@ -211,23 +212,31 @@ void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
 
 }
 
-void hit(Line *currLine, Line *allLines, int numLines, int rootIndex, char *fileLine) {
-    if (VERBOSE)
+/**
+ * @author Roxanne Lutz
+ * hit procedure. 
+ * if the hit line is not already priority one:
+ * change it to one,
+ * increment all other priorities on non-empty lines by one that have priority less than the old one,
+ * fix the heap from the hit line down.
+ */
+void hit(Line *allLines, int numLines, int lineUpdateIndex, char *fileLine) {
+    if (VERBOSE) // printing
         printf("%s -- hit \n", fileLine);
 
-    int oldPriority = currLine -> priority;
+    short oldPriority = allLines[lineUpdateIndex].priority; // grab the old priority of hit line
     if (oldPriority != 1) { // if == 1, do nothing
-        
-        allLines[rootIndex].priority = 1; // change priority of line to 1
-        for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
-            Line otherLine = allLines[i];
-            if (i != rootIndex && otherLine.priority != -1 && (otherLine.priority) < oldPriority) {
+        allLines[lineUpdateIndex].priority = 1; // change priority of line to 1
+        short otherPriority;
+
+        for (int i = 0; i < numLines; i++) { // increment all non-empty line priorities < the old one
+            otherPriority = allLines[i].priority;
+            if (i != lineUpdateIndex && otherPriority > 0 && otherPriority < oldPriority) 
                 allLines[i].priority++;
-            } // end if
         } // end loop
-        maxHeapify(allLines, rootIndex, numLines); // root index
-    }
-}
+        maxHeapify(allLines, lineUpdateIndex, numLines); // max heap fix from this changed hit line
+    } // end if
+} // end method
 
 /**
  * @author Roxanne Lutz
@@ -438,7 +447,7 @@ char *convertHexToBinary(char hex) {
         // exit gracefully if we got something strange
         printf("Something went wrong: received an undefined hex value: %c", hex);
         freeAllMemory();
-        exit(-1);
+        exit(2);
 } // end method
 
 /**
@@ -450,7 +459,7 @@ void checkNullPtr(void *ptr) {
     if (!ptr) {
         printf("Null pointer returned by malloc. Exiting.\n");
         freeAllMemory();
-        exit(-1);
+        exit(1);
     } // end if
 } // end method
 
@@ -463,24 +472,42 @@ void checkNullPtr(void *ptr) {
 void *getMemory(short howMany, short size) {
     void *ptr = malloc(howMany * size);
     checkNullPtr(ptr);
-    freeMemoryList[freedomCounter++] = ptr;
     return ptr;   
 } // end method
 
 /**
  * @author Roxanne Lutz
  * need to ensure freeing of all malloc'd memory upon program exit.
- * free memory list is only really used when initializing the cache.
- * this is simply to make dev life easier in making sure to add things that 
- * need to live through the program's life that i need to make sure to 
- * free upon completion.
+ * malloc is really only used for cache, so this just goes through the 
+ * cache and frees any non-null pointers made in intialization. 
+ * this could get called at strange times, so we need to check for null
+ * as we go.
  */
 void freeAllMemory() {
     // printf("Freeing memory... \n"); 
-    short counter = 0;
-    while (freeMemoryList[counter]) {
-        free(freeMemoryList[counter++]);
-    } // end loop
+    if (cache) {
+        short numSets = (*cache).numSets;
+        short numLines;
+        Line *lines;
+        char *tag;
+        Set *sets = (*cache).sets;
+        if (sets) {
+            for (short i = 0; i < numSets; i++) {
+                    if (lines) {
+                        lines = (*cache).sets[i].lines; // get line ptr
+                        numLines = (*cache).sets[i].numLines; // number of lines in set
+                        for (short j = 0; j < numLines; j++) {
+                            tag = lines[j].tag;
+                            if (tag) 
+                                free(tag); // free all malloc tags 
+                        } // end loop
+                        free(lines); // free the set's line ptr
+                    } // end if
+            } // end loop
+            free(sets); // free the set ptr
+        } // end if
+        free(cache); // free the cache ptr
+    } // end if
 } // end method
 
 /**
