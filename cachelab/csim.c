@@ -12,6 +12,7 @@
 #define SPACE_INDEX 0 
 #define ACTION_INDEX 1
 #define ADDRESS_START_INDEX 3
+#define NUM_BITS_TO_HEX 4
 
 // struct definitions for ease of reading
 typedef struct  {
@@ -282,58 +283,46 @@ void miss(Set *set, char *tag, char *fileLine) {
     // free(tag);
 }
 
+/**
+ * @author Roxanne Lutz
+ * basic max heapify implementation. 
+ * simply maintains the heap of the lines as needed
+ */
 void maxHeapify(Line *A, int parent, int end) {
-    int max = parent;
-    int lChild = (2 * parent) + 1;
-    int rChild = (2 * parent) + 2;
+    int max = parent; // assume max is parent
+    int lChild = (2 * parent) + 1; // left child
+    int rChild = (2 * parent) + 2; // right child
 
-    // Line *parentPointer = A + (parent * sizeof(Line));
-    // Line *lChildPointer = A + (lChild * sizeof(Line));
-    // Line *rChildPointer = A + (rChild * sizeof(Line));
-
-    // Line parentLine = A[parent];
-    Line lChildLine = A[lChild];
-    Line rChildLine = A[rChild];
-
-    if (lChild < end && (lChildLine.priority) > (A[max].priority))
+    // get max of all (parent, left, right)
+    if (lChild < end && (A[lChild].priority) > (A[max].priority))
         max = lChild;
     
-    if (rChild < end && (rChildLine.priority) > (A[max].priority))
+    if (rChild < end && (A[rChild].priority) > (A[max].priority))
         max = rChild;
     
-    if (max != parent) {
-        // Line *temp = A + (max * sizeof(Line));
-        // A + (parent * sizeof(Line)) = A + (max * sizeof(Line));
-        // A + (max * sizeof(Line)) = parentPointer;
+    if (max != parent) { // if swap needed, swap
         Line temp = A[parent];
         A[parent] = A[max];
         A[max] = temp;
-        maxHeapify(A, max, end);
-    }
-}
-
-// char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
-// char valid; // 0 or 1
-// short priority; // for mimicking LRU functionality. likely never more than short
-// short numBlocks;
-// char *data;
-
-
+        maxHeapify(A, max, end); // recur to subtree
+    } // end if
+} // end method
 
 /**
+ * @author Roxanne Lutz
  * purpose of this method is to grab the hex address and convert to 
  * binary. return it as a string of binary numbers.
  * number of bits is at least 64
  */
-void getAddressConversion(char *line, char *binaryAddress) {
-    char hex;
-    char *hexToBinary;
+void getAddressConversion(char *fileLine, char *binAddressContainer) {
+    char hex; // holder for the hex char
+    char *hexToBinary; // holder for hex to binary conversion
     char binaryIndex = 0; // index for filling binary rep of address
-    short lineIndex = ADDRESS_START_INDEX; // start of the address in line
     char countHex = 0; // for counting how many hex given
+    short lineIndex = ADDRESS_START_INDEX; // start of the address in line
 
     // count how many hex chars there are in given address
-    while (line[lineIndex] != ',') {
+    while (fileLine[lineIndex] != ',') {
         countHex++;
         lineIndex++;
     } // end loop
@@ -341,28 +330,21 @@ void getAddressConversion(char *line, char *binaryAddress) {
     lineIndex = ADDRESS_START_INDEX; // reset
 
     // calculate how many filler zeros needed at start of binary address
-    char fillerZeros = (NUM_HEX_IN_ADDRESS - countHex) * 4;
-    for (short i = 0; i < fillerZeros; i++) { // fill with filler zeros
-        binaryAddress[i] = '0';
-    } // end loop
+    char fillerZeros = (NUM_HEX_IN_ADDRESS - countHex) * NUM_BITS_TO_HEX; 
+    for (short i = 0; i < fillerZeros; i++) // fill with filler zeros
+        binAddressContainer[i] = '0';
 
     binaryIndex = fillerZeros; // offset the index by num filler zeros
-    // printf("filler zeros: %s\n", binaryAddress);
 
-    while ((hex = line[lineIndex]) != ',') { 
-
+    while ((hex = fileLine[lineIndex]) != ',') { 
         hexToBinary = convertHexToBinary(hex); // get the binary of this hex char
-        if (!hexToBinary) // don't want to continue if something went awry there
-            break;
 
-        for (int j = 0; j < 4; j++) // fill with more binary
-            binaryAddress[binaryIndex + j] = hexToBinary[j];
+        for (int j = 0; j < NUM_BITS_TO_HEX; j++) // fill with more binary
+            binAddressContainer[binaryIndex + j] = hexToBinary[j];
                 
-        binaryIndex += 4; // leap 4 ahead
-        // printf("after adding %c -> %s:\n%s\n",hex, hexToBinary, binaryAddress);
-        lineIndex++;
-    }
-    // return binaryAddress;
+        binaryIndex += NUM_BITS_TO_HEX; // leap 4 ahead
+        lineIndex++; // move next character in line
+    } // end loop
 } // end method
 
 /**
@@ -380,7 +362,6 @@ Cache *initCache(int argc, char *argv[]) {
     // use getopt to easily extract arguments
     while((opt = getopt(argc, argv, "s:E:b:t:v")) != -1) 
     { 
-
         switch(opt) 
         { 
             case 's':
@@ -400,12 +381,8 @@ Cache *initCache(int argc, char *argv[]) {
             case 'v':
                 VERBOSE = 1;
                 break;
-            case ':': 
-                printf("option needs a value\n"); 
-                break; 
-            case '?': 
-                printf("unknown option: %c\n", optopt);
-                break; 
+            case ':': printf("option needs a value\n"); break; 
+            case '?': printf("unknown option: %c\n", optopt); break; 
         } // end switch case
     }  // end loop
 
@@ -468,8 +445,10 @@ char *convertHexToBinary(char hex) {
             case 'F':
             case 'f': return "1111"; break;
         } // end switch case;
+        // exit gracefully if we got something strange
         printf("Something went wrong: received an undefined hex value: %c", hex);
-        return 0;
+        freeAllMemory();
+        exit(-1);
 } // end method
 
 /**
