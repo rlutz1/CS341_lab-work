@@ -62,6 +62,7 @@ void printCache(Cache cache);
 
 int main(int argc, char *argv[]) { 
     // extract all arguments and values, init the cache 
+    // note: 2 + (numSets) + (numLines * numSets) = size of free mem array if that route chosen
     Cache *cache = initCache(argc, argv);
 
     // go through lines and simulate cache
