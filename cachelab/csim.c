@@ -372,7 +372,7 @@ char * convertHexToBinary(char hex) {
                 return "0000"; break;
             case '1':
                 return "0001"; break;
-            case '2':
+            case '2': //
                 return "0010"; break;
             case '3':
                 return "0011"; break;
