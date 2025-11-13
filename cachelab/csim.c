@@ -42,7 +42,7 @@ static char *traceFilename = 0;
 static int hits = 0;
 static int misses = 0;
 static int evictions = 0;
-static void *freeMemoryList[100] = {0};
+static void *freeMemoryList[200] = {0};
 static short freedomCounter = 0;
 
 // method declarations
@@ -60,23 +60,17 @@ void *getMemory(short howMany, short size);
 void freeAllMemory();
 void printCache(Cache cache);
 
-int main(int argc, char *argv[])
-{    // malloc you fucking idiot
-    // (1) extract all arguments and values 
+int main(int argc, char *argv[]) { 
+    // extract all arguments and values, init the cache 
     Cache *cache = initCache(argc, argv);
-    // printCache(*cache);
 
-    // (2) go through lines and attempt to interact through cache
-    // -- if L: tryReadCache(addr)
-    // -- if S: tryWriteCache(addr) // kinda the same as L really
-    // -- if M: tryReadCache(addr), tryWriteCache(addr) // load then store
-    // ** COUNT HITS AND MISSES AND EVICTIONS!
+    // go through lines and simulate cache
     simulate(cache);
 
     printSummary(hits, misses, evictions);
     freeAllMemory(cache);
     return 0;
-}
+} // end main method
 
 void simulate(Cache *cache) {
     if (traceFilename) {
