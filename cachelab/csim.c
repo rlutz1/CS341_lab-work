@@ -222,7 +222,7 @@ void hit(Line *currLine, Line *allLines, int numLines, int rootIndex) {
         allLines[rootIndex].priority = 1; // change priority of line to 1
         for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
             Line otherLine = allLines[i];
-            if (i != rootIndex && (otherLine.priority) < oldPriority) {
+            if (i != rootIndex && otherLine.priority != -1 && (otherLine.priority) < oldPriority) {
                 allLines[i].priority++;
             } // end if
         } // end loop
@@ -289,14 +289,14 @@ void maxHeapify(Line *A, int parent, int end) {
     // Line *lChildPointer = A + (lChild * sizeof(Line));
     // Line *rChildPointer = A + (rChild * sizeof(Line));
 
-    Line parentLine = A[parent];
+    // Line parentLine = A[parent];
     Line lChildLine = A[lChild];
     Line rChildLine = A[rChild];
 
-    if (lChild < end && (lChildLine.priority) > (parentLine.priority))
+    if (lChild < end && (lChildLine.priority) > (A[max].priority))
         max = lChild;
     
-    if (rChild < end && (rChildLine.priority) > (parentLine.priority))
+    if (rChild < end && (rChildLine.priority) > (A[max].priority))
         max = rChild;
     
     if (max != parent) {
