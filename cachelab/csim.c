@@ -36,6 +36,7 @@ typedef struct {
 } Cache;
 
 // globals
+static short VERBOSE = 0;
 static char *traceFilename = 0;
 static int RLhits = 0;
 static int RLmisses = 0;
@@ -46,7 +47,7 @@ static void *freeMemoryList[100] = {0};
 Cache *initCache(int argc, char *argv[]);
 void simulate(Cache *cache);
 void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine);
-void hit(Line line, Line *allLines, int numLines, int rootIndex);
+void hit(Line *line, Line *allLines, int numLines, int rootIndex);
 void miss(Set *set, char *tag, char *fileLine);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
@@ -89,7 +90,7 @@ void simulate(Cache *cache) {
             // printf("%s", line);
            
             if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
-                printf("%s\n", line);
+                // printf("%s\n", line);
                 
                 // we need to (1) snag the argument
                 char action = line[ACTION_INDEX];
@@ -168,6 +169,16 @@ int equalTags(char *tag1, char *tag2, int expectedLength) {
     return 0;
 }
 
+void printSet(Set set, char *tag) {
+    printf("tag of addr: %s\n", tag);
+    
+    Line currLine;
+    for (int i = 0; i < set.numLines; i++) {
+        currLine = set.lines[i];
+        printf("priority: %d, valid: %d \ntag: %s\n", currLine.priority, currLine.valid, currLine.tag);
+    }
+}
+
 // we look at cache.sets[set decimal]
 // we look at each line (or technically until priority == -1 due to heaping) for the tag. for now, let's look at all
 // if (tag == tag): hit count++; hit() // conduct hit procedure
@@ -176,32 +187,43 @@ void lookForData(Cache *cache, int setIndex, char *tag, char *fileLine) {
     Set currSet = (*cache).sets[setIndex];
     // printf("curr set hit\n");
     // printf("sakdnasjdbsak");
-    printf("tag we're searching for: %s\n", tag);
+    // printf("tag we're searching for: %s\n", tag);
     for (int i = 0; i < currSet.numLines; i++) {
         Line currLine = currSet.lines[i]; //+ (i * sizeof(Line));
-        printf("looking for data, set %d: %d, %d, %s\n", setIndex, currLine.valid, currLine.priority, currLine.tag);
+        // printf("looking for data, set %d: %d, %d, %s\n", setIndex, currLine.valid, currLine.priority, currLine.tag);
         // if (currLine.valid == 1 && strcmp(currLine.tag, tag) == 0)  {
         if (currLine.valid == 1 && equalTags(currLine.tag, tag, (*cache).numTagBits) == 0)  {
-            printf("%s hit \n", fileLine);
-            RLhits++; hit(currLine, currSet.lines, currSet.numLines, i);
+            if (VERBOSE)
+                printf("%s -- hit \n", fileLine);
+            RLhits++; hit(&currLine, currSet.lines, currSet.numLines, i);
+            printf("set %d\n", setIndex);
+            printSet(currSet, tag);
             // free(tag);
             return;
         }
     }
-    // made it this far, must have been a miss
-    printf("%s miss\n", fileLine);
+    // // made it this far, must have been a miss
+    // printf("was looking for but didnt find: \n%s\n in set %d ", tag, setIndex);
+    // printf("current state of set\n");
+    
+    printf("\n\n");
+    if (VERBOSE)
+        printf("%s -- miss\n", fileLine);
     RLmisses++; miss(&currSet, tag, fileLine);
+    printf("set %d\n", setIndex);
+    printSet(currSet, tag);
 
 }
 
-void hit(Line currLine, Line *allLines, int numLines, int rootIndex) {
-    if ((currLine.priority) != 1) { // if == 1, do nothing
-        int oldPriority = currLine.priority;
-        (currLine.priority) = 1; // change priority of line to 1
+void hit(Line *currLine, Line *allLines, int numLines, int rootIndex) {
+    int oldPriority = currLine -> priority;
+    if (oldPriority != 1) { // if == 1, do nothing
+        
+        allLines[rootIndex].priority = 1; // change priority of line to 1
         for (int i = 0; i < numLines; i++) { // increment all priorities < the old one
             Line otherLine = allLines[i];
             if (i != rootIndex && (otherLine.priority) < oldPriority) {
-                otherLine.priority++;
+                allLines[i].priority++;
             } // end if
         } // end loop
         maxHeapify(allLines, rootIndex, numLines); // root index
@@ -215,7 +237,7 @@ void miss(Set *set, char *tag, char *fileLine) {
     for (int i = 0; i < (*set).numLines; i++) {
         currLine = allLines[i];// grab the line
         if (currLine.priority == -1) { // if priority == -1, that means we have an empty slot; we are not concerned with invalidation i guess
-            printf("priority -1 is catching \n");
+            // printf("priority -1 is catching \n");
             // increment all other priorities
             for (int j = 0; j < (*set).numLines; j++) {
                 if ((*set).lines[j].priority > 0) {
@@ -234,8 +256,8 @@ void miss(Set *set, char *tag, char *fileLine) {
             return; // nothing else to do, no eviction, exit the function
         } // end if
     } // end loop
-
-    printf("%s eviction\n", fileLine);
+    if (VERBOSE) 
+        printf("%s -- eviction\n", fileLine);
 
     // if we manage to get out of this loop, that means we need to evict.
     RLevictions++;// first, remember to increment eviction count
@@ -402,7 +424,7 @@ Cache *initCache(int argc, char *argv[]) {
     int numBlockBits = 0;
     
     // use getopt to easily extract arguments
-    while((opt = getopt(argc, argv, "s:E:b:t:")) != -1) 
+    while((opt = getopt(argc, argv, "s:E:b:t:v")) != -1) 
     { 
 
         switch(opt) 
@@ -420,6 +442,9 @@ Cache *initCache(int argc, char *argv[]) {
                 break;
             case 't':
                 traceFilename = optarg;
+                break;
+            case 'v':
+                VERBOSE = 1;
                 break;
             case ':': 
                 printf("option needs a value\n"); 
