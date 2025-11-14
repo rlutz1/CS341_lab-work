@@ -1,3 +1,11 @@
+/**
+ * NAME: Roxanne Lutz
+ * UNM ID: 101990885
+ * 
+ * below is the full simulation of an LRU cache
+ * true to the design document submitted.
+ */
+
 #include "cachelab.h"
 #include <getopt.h>
 #include <stdlib.h>
@@ -6,6 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
+// some useful constants
 #define MAX_LINE_SIZE 256
 #define NUM_HEX_IN_ADDRESS 16
 #define NUM_BITS_IN_ADDRESS 64
@@ -16,9 +25,9 @@
 
 // struct definitions for ease of reading
 typedef struct  {
-    char *tag; // not sure if this is most appropriate yet; could be better with nuuummbberrr?? since tag is unique, decimal number from it should be as well?
-    char valid; // 0 or 1
-    short priority; // for mimicking LRU functionality. likely never more than short
+    char *tag; 
+    char valid; 
+    short priority; // for mimicking LRU functionality
     short numBlocks;
     char *data;
 } Line;
@@ -37,7 +46,7 @@ typedef struct {
 } Cache;
 
 // globals
-static short VERBOSE = 0;
+static char VERBOSE = 0;
 static char *traceFilename = 0;
 static int hits = 0;
 static int misses = 0;
@@ -53,128 +62,84 @@ void miss(Line *allLines, short numLines, char *tag, char *fileLine);
 void maxHeapify(Line *A, int parent, int end);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
-
 void checkNullPtr(void *ptr);
 void *getMemory(short howMany, short size);
 void freeAllMemory();
-void printCache(Cache cache);
 
-int main(int argc, char *argv[]) { 
-    // extract all arguments and values, init the cache 
-    // note: 2 + (numSets) + (numLines * numSets) = size of free mem array if that route chosen
-    cache = initCache(argc, argv);
-
-    // go through lines and simulate cache
-    simulate();
-
-    printSummary(hits, misses, evictions);
-    freeAllMemory();
+/**
+ * @author Roxanne Lutz
+ * main method entry point.
+ */
+int main(int argc, char *argv[]) {     
+    cache = initCache(argc, argv); // extract all arguments and values, init the cache 
+    simulate();  // go through lines and simulate cache
+    printSummary(hits, misses, evictions); // final print summary
+    freeAllMemory(); // free all memory allocated for simulation
     return 0;
 } // end main method
 
+/**
+ * @author Roxanne Lutz
+ * main simulation run code. iterate through the file, grab addresses,
+ * retrieve needed information, and spur the search through the cache.
+ */
 void simulate() {
-    if (traceFilename) {
+    if (traceFilename) { // if we got a file name from command line
         FILE *fp;
         char line[MAX_LINE_SIZE];
 
-        fp = fopen(traceFilename, "r");
+        fp = fopen(traceFilename, "r"); // open file to read
 
-        if (!fp) {
+        if (!fp) { // don't do anything if file open failed
             printf("Something went wrong: file open failed.\n"); return;
         } // end if
 
-        while (fgets(line, sizeof(line), fp)) {
-            // printf("%s", line);
-           
-            if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
-                // printf("%s\n", line);
-                
-                // we need to (1) snag the argument
-                char action = line[ACTION_INDEX];
-                // printf("%c\n", action);
-                // (2) grab the hex address and convert to binary
-                char binaryAddress[NUM_BITS_IN_ADDRESS] = {0};
-                getAddressConversion(line, binaryAddress);
-                // printf("%s\n", binaryAddress);
-                // we can ignore the size here
+        while (fgets(line, sizeof(line), fp)) { // iterate through file
 
-                // okay, so we have the binary rep now in binaryAddress
-                // we need the cache to know how many bits for tag, set, and block offset
+            if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
+                char action = line[ACTION_INDEX]; // snag the argument
                 
-                // char *tag = (char *) malloc(cache.numTagBits * sizeof(char)); // + 1?
-                // checkNullPtr(tag);
-                char tag[(*cache).numTagBits + 1];
-                // grab the tag from the binary address
-                for (int i = 0; i < (*cache).numTagBits; i++) {
+                char binaryAddress[NUM_BITS_IN_ADDRESS] = {0}; // grab the hex address and convert to binary
+                getAddressConversion(line, binaryAddress);
+
+                short numSetBits = (*cache).numSetBits;
+                short numTagBits = (*cache).numTagBits;
+                
+                // build the tag from the address
+                char tag[numTagBits + 1];
+                for (int i = 0; i < numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
-                // TODO i commented this, but no dice
-                tag[(*cache).numTagBits] = '\0'; // enforce null for ease of printing
-                // printf("kdnsds: %s\n", tag);
-                // grab the set bits
-                // TODO: get rid of this char[] and just compute the decimal in 1 fell swoop?
-                char setNum[(*cache).numSetBits + 1];
-                for (int i = (*cache).numTagBits, j = 0; j < (*cache).numSetBits; i++, j++) {
+                tag[numTagBits] = '\0'; // enforce null
+                
+                // grab the set bits from the address
+                char setNum[numSetBits + 1];
+                for (int i = numTagBits, j = 0; j < numSetBits; i++, j++) {
                     setNum[j] = binaryAddress[i];
                 } // end loop
-                setNum[(*cache).numSetBits] = '\0'; // enforce null for ease of printing
+                setNum[numSetBits] = '\0'; // enforce null
 
-                // printf("tag: %s\nsetnum: %s\n", tag, setNum);
-                // we can snag set bits and convert that to decimal
+                // convert the char[] to a decimal index
                 int setIndex = 0;
-                for (int i = ((*cache).numSetBits - 1), j = 0; i > -1; i--, j++) {
+                for (int i = (numSetBits - 1), j = 0; i > -1; i--, j++) {
                     if (setNum[i] == '1') 
                         setIndex += pow(2, j);
                 } // end loop
 
-                // printf("set index: %d\n", setIndex);
-
-                switch (action) {
+                switch (action) { // L and S are same, M is just call twice
                     case 'L':
-                    case 'S':
-                        lookForData(setIndex, tag, line);
-                        break;
-                    case 'M':
-                        lookForData(setIndex, tag, line);
-                        lookForData(setIndex, tag, line);
-                        break;
-                    default:
-                        printf("Got action not defined? %c\n", action);
-                        break;
+                    case 'S': lookForData(setIndex, tag, line); break;
+                    case 'M': lookForData(setIndex, tag, line); lookForData(setIndex, tag, line); break;
+                    default:  printf("Got action not defined? %c\n", action); break;
                 } // end switch case
-                // for (int i = 0; i < cache.sets[setIndex].numLines; i++) {
-                //     printf("%s\n", cache.sets[setIndex].lines[i].tag);
-                // }
-                
             } // end if
         } // end loop
 
-        fclose(fp);
-
+        fclose(fp); // close file
     } else {
         printf("Something went wrong: trace file name was not given.\n");
     } // end if
 } // end method
-
-int equalTags(char *tag1, char *tag2, int expectedLength) {
-
-    for (int i = 0; i < expectedLength; i++) {
-        if (tag1[i] != tag2[i]) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-void printSet(Set set, char *tag) {
-    printf("tag of addr: %s\n", tag);
-    
-    Line currLine;
-    for (int i = 0; i < set.numLines; i++) {
-        currLine = set.lines[i];
-        printf("priority: %d, valid: %d \ntag: %s\n", currLine.priority, currLine.valid, currLine.tag);
-    }
-}
 
 /**
  * @author Roxanne Lutz
@@ -493,31 +458,4 @@ void freeAllMemory() {
         } // end if
         free(cache); // free the cache ptr
     } // end if
-} // end method
-
-/**
- * @author Roxanne Lutz
- * method for printing cache for debugging purposes only.
- */
-void printCache(Cache cache) {
-    printf("Number of sets: %d \n\n", cache.numSets); 
-
-    for (int i = 0; i < cache.numSets; i++) {
-
-        Set set = cache.sets[i];
-        Line *lines = set.lines;
-        printf("Num lines in set %d: %d \n", i, set.numLines);
-        for (int j = 0; j < set.numLines; j++) {
-  
-            Line line = lines[j];
-   
-            printf("\nLINE %d \n", j);
-            printf("tag in line: %s \n", line.tag);
-            printf("valid bit: %d \n", line.valid);
-            printf("priority: %d \n", line.priority);
-            printf("number of bytes of data in line: %d \n", line.numBlocks);
-            printf("data in blocks of line: %s \n", line.data);
-            printf("END LINE\n\n");
-        } // end loop
-    } // end loop
 } // end method
