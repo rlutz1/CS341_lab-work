@@ -415,8 +415,7 @@ void checkNullPtr(void *ptr) {
 
 /**
  * @author Roxanne Lutz
- * method to malloc a ptr dynamically, check for null,
- * and add to a list keeping track of pointers to free on exit.
+ * method to malloc a ptr dynamically, check for null.
  * just makes my life less complicated.
  */
 void *getMemory(short howMany, short size) {
