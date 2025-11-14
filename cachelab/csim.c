@@ -94,28 +94,31 @@ void simulate() {
             printf("Something went wrong: file open failed.\n"); return;
         } // end if
 
+        short numSetBits = (*cache).numSetBits; // grab the number of set bits
+        short numTagBits = (*cache).numTagBits; // grab num tag bits
+        short setIndexStart = numTagBits + numSetBits - 1; // where the set info starts in binary address
+        char action; // action from the line
+        short setIndex; // accumulator counter for set index
+        char tag[numTagBits + 1]; // tag builder
+        char binaryAddress[NUM_BITS_IN_ADDRESS] = {0}; // hex -> binary builder
+
         while (fgets(line, sizeof(line), fp)) { // iterate through file
 
             if (line[SPACE_INDEX] == ' ') { // ignore all I instructions
-                char action = line[ACTION_INDEX]; // snag the argument
+                action = line[ACTION_INDEX]; // snag the argument
                 
-                char binaryAddress[NUM_BITS_IN_ADDRESS] = {0}; // grab the hex address and convert to binary
+                // binaryAddress = {0}; // grab the hex address and convert to binary
                 getAddressConversion(line, binaryAddress);
 
-                short numSetBits = (*cache).numSetBits;
-                short numTagBits = (*cache).numTagBits;
-                
                 // build the tag from the address
-                char tag[numTagBits + 1];
                 for (int i = 0; i < numTagBits; i++) {
                     tag[i] = binaryAddress[i];
                 } // end loop
                 tag[numTagBits] = '\0'; // enforce null
                 
                 // gather the set number 
-                short setIndex = 0;
-                short start = numTagBits + numSetBits - 1;
-                for (short i = start, j = 0; i >= numTagBits; i--, j++) {
+                setIndex = 0;
+                for (short i = setIndexStart, j = 0; i >= numTagBits; i--, j++) {
                     if (binaryAddress[i] == '1')
                         setIndex += pow(2, j);
                 } // end loop
