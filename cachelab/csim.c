@@ -112,17 +112,11 @@ void simulate() {
                 } // end loop
                 tag[numTagBits] = '\0'; // enforce null
                 
-                // grab the set bits from the address
-                char setNum[numSetBits + 1];
-                for (int i = numTagBits, j = 0; j < numSetBits; i++, j++) {
-                    setNum[j] = binaryAddress[i];
-                } // end loop
-                setNum[numSetBits] = '\0'; // enforce null
-
-                // convert the char[] to a decimal index
-                int setIndex = 0;
-                for (int i = (numSetBits - 1), j = 0; i > -1; i--, j++) {
-                    if (setNum[i] == '1') 
+                // gather the set number 
+                short setIndex = 0;
+                short start = numTagBits + numSetBits - 1;
+                for (short i = start, j = 0; i >= numTagBits; i--, j++) {
+                    if (binaryAddress[i] == '1')
                         setIndex += pow(2, j);
                 } // end loop
 
