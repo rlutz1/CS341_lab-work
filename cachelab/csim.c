@@ -33,15 +33,15 @@ typedef struct  {
 } Line;
 
 typedef struct {
-    int numLines; 
+    short numLines; 
     Line *lines;
 } Set;
 
 typedef struct {
-    int numSets;
-    int numTagBits;
-    int numSetBits;
-    int numBlockBits;
+    short numSets;
+    short numTagBits;
+    short numSetBits;
+    short numBlockBits;
     Set *sets;
 } Cache;
 
@@ -56,10 +56,10 @@ static Cache * cache;
 // method declarations
 Cache *initCache(int argc, char *argv[]);
 void simulate();
-void lookForData(int setIndex, char *tag, char *fileLine);
-void hit(Line *allLines, int numLines, int lineUpdateIndex, char *fileLine);
+void lookForData(short setIndex, char *tag, char *fileLine);
+void hit(Line *allLines, short numLines, short lineUpdateIndex, char *fileLine);
 void miss(Line *allLines, short numLines, char *tag, char *fileLine);
-void maxHeapify(Line *A, int parent, int end);
+void maxHeapify(Line *A, short parent, short end);
 char *convertHexToBinary(char hex);
 void getAddressConversion(char *line, char *binaryAddress);
 void checkNullPtr(void *ptr);
@@ -143,7 +143,7 @@ void simulate() {
  * just a simple method to use to bundle up the search for a hit.
  * and handle a miss if occurrs.
  */
-void lookForData(int setIndex, char *tag, char *fileLine) {
+void lookForData(short setIndex, char *tag, char *fileLine) {
     Set currSet = (*cache).sets[setIndex];
     Line currLine;
 
@@ -167,7 +167,7 @@ void lookForData(int setIndex, char *tag, char *fileLine) {
  * increment all other priorities on non-empty lines by one that have priority less than the old one,
  * fix the heap from the hit line down.
  */
-void hit(Line *allLines, int numLines, int lineUpdateIndex, char *fileLine) {
+void hit(Line *allLines, short numLines, short lineUpdateIndex, char *fileLine) {
     if (VERBOSE) // printing
         printf("%s -- hit \n", fileLine);
 
@@ -234,7 +234,7 @@ void miss(Line *allLines, short numLines, char *tag, char *fileLine) {
  * basic max heapify implementation. 
  * simply maintains the heap of the lines as needed
  */
-void maxHeapify(Line *A, int parent, int end) {
+void maxHeapify(Line *A, short parent, short end) {
     int max = parent; // assume max is parent
     int lChild = (2 * parent) + 1; // left child
     int rChild = (2 * parent) + 2; // right child
