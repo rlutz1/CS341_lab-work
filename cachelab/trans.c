@@ -126,34 +126,94 @@ char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
 
-   for (int i = 0; i < N; i += blocksize) { // row block increaser
+
+    // this goes left -> right
     for (int j = 0; j < M; j += blocksize) { // col block increaser
-        
-        for (int ii = i; ii < i + blocksize; ii++) {
-            for (int jj = j; jj < j + blocksize; jj++) {
-                B[jj][ii] = A[ii][jj];
+        for (int i = 0; i < N; i += blocksize) { // row block increaser
+     
+            for (int ii = i; ii < i + blocksize; ++ii) {
+                for (int jj = j; jj < j + blocksize; ++jj) {
+                    B[jj][ii] = A[ii][jj];
+                }
             }
         }
     }
-  }
 }
 
 
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
-   int blocksize = 8;
-   int test = 32;
-   
-   for (int i = 0; i < N; i += blocksize) { // row block increaser
+
+    int blocksize = 4; // seems like out incers don't actually matter, this DOES
+    
+
+    // this goes left -> right
     for (int j = 0; j < M; j += blocksize) { // col block increaser
-        
-        for (int ii = i; ii < i + blocksize; ii++) {
-            for (int jj = j; jj < j + blocksize; jj++) {
-                B[jj][ii] = A[ii][jj];
+        for (int i = 0; i < N; i += blocksize) { // row block increaser
+     
+            for (int ii = i; ii < i + blocksize; ii++) {
+                for (int jj = j; jj < j + blocksize; jj++) {
+                    B[jj][ii] = A[ii][jj];
+                }
             }
         }
     }
-  }
+//   int blocksize = 4;
+//   int inc = 64;
+
+//   for (int j_inc = 0; j_inc < M; j_inc += inc) {
+//     for (int j = j_inc; j < j_inc + inc; j += blocksize) { // col block increaser
+
+//         for (int i_inc = 0; i_inc < N; i_inc += inc) {
+//             for (int i = i_inc; i < i_inc + inc; i += blocksize) { // row block increaser
+          
+//                 for (int ii = i; ii < i + blocksize; ii++) {
+//                     for (int jj = j; jj < j + blocksize; jj++) {
+//                         B[jj][ii] = A[ii][jj];
+//                     }
+//                 }
+
+//             }
+//         }
+        
+//     }
+//   }
+
+    
+
+    // for (int j = 0; j < 32; j += blocksize) { // col block increaser
+    //     for (int i = 32; i < 64; i += blocksize) { // row block increaser
+        
+    //         for (int ii = i; ii < i + blocksize; ii++) {
+    //             for (int jj = j; jj < j + blocksize; jj++) {
+    //                 B[jj][ii] = A[ii][jj];
+    //             }
+    //         }
+    //     }
+    // }
+
+    // for (int j = 32; j < 64; j += blocksize) { // col block increaser
+    //     for (int i = 0; i < 32; i += blocksize) { // row block increaser    
+          
+    //         for (int ii = i; ii < i + blocksize; ii++) {
+    //             for (int jj = j; jj < j + blocksize; jj++) {
+    //                 B[jj][ii] = A[ii][jj];
+    //             }
+    //         }
+    //     }
+    // }
+    
+    // for (int j = 32; j < 64; j += blocksize) { // col block increaser
+    //     for (int i = 32; i < 64; i += blocksize) { // row block increaser
+       
+    //         for (int ii = i; ii < i + blocksize; ii++) {
+    //             for (int jj = j; jj < j + blocksize; jj++) {
+    //                 B[jj][ii] = A[ii][jj];
+    //             }
+    //         }
+    //     }
+    // }
+
 }
 
 

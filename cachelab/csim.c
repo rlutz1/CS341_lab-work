@@ -146,6 +146,9 @@ void simulate() {
 void lookForData(short setIndex, char *tag, char *fileLine) {
     Set currSet = (*cache).sets[setIndex];
     Line currLine;
+    
+    if (VERBOSE)
+        printf("Looking in set %d for tag %s\n", setIndex, tag);
 
     for (int i = 0; i < currSet.numLines; i++) { // iterate through the lines
         currLine = currSet.lines[i];
