@@ -54,15 +54,11 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
     int col; 
 
      for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
-        // printf("log is %d\n", log);
 
         // will iterate 1, then 2, then 4...
         for (int starting_place = 0; starting_place < N - 1; starting_place += last_size) { // size to jump for next block
 
           for (int row_counter = 0; row_counter < log; row_counter++) { // needs to iterate 4 times
-          // row = log + jumper + (test % log); // + col _ shifter
-        
-            //   printf("starter is %d\n", starting_place);
 
               // always start with log, offset by the jump, and through how many "last rows" we have
               row = log + starting_place + (row_counter % log); 
@@ -71,26 +67,44 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
               // i guess we can just have its own jumper
               for (int col_jumper = 0; col_jumper < N - 1; col_jumper += last_size) { // size to jump for next block
                 for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
-                    // printf("iterator inner is %d\n", col_counter);
                       
                     col = col_jumper + (col_counter % log);
-                      
-                    // printf("ACCESSING B: (%d, %d)\n", row, col);
+
                     B[row][col] = A[col][row];
-                    B[col][row] = A[row][col];
-                  // for_col++;
+                    
                 }
-                // for_col = 0;
-              // // test++
-              // for_row++; 
               }
             }
-            // test = 0;
-            // for_row = 0;
-            
         }
         last_size /= 2;
-        
+    }
+
+    last_size = N; // we are assuming M == N here!
+
+    for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
+
+        // will iterate 1, then 2, then 4...
+        for (int starting_place = 0; starting_place < N - 1; starting_place += last_size) { // size to jump for next block
+
+          for (int row_counter = 0; row_counter < log; row_counter++) { // needs to iterate 4 times
+
+              // always start with log, offset by the jump, and through how many "last rows" we have
+              row = log + starting_place + (row_counter % log); 
+
+              // now, the columns...
+              // i guess we can just have its own jumper
+              for (int col_jumper = 0; col_jumper < N - 1; col_jumper += last_size) { // size to jump for next block
+                for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
+                      
+                    col = col_jumper + (col_counter % log);
+
+                    B[col][row] = A[row][col]; // i think this could be a major problem.
+                    
+                }
+              }
+            }
+        }
+        last_size /= 2;
     }
 
 
