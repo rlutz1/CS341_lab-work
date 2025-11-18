@@ -126,7 +126,6 @@ char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
 
-
     // this goes left -> right
     for (int j = 0; j < M; j += blocksize) { // col block increaser
         for (int i = 0; i < N; i += blocksize) { // row block increaser
@@ -143,10 +142,8 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
 
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
-
     int blocksize = 4; // seems like out incers don't actually matter, this DOES
     
-
     // this goes left -> right
     for (int j = 0; j < M; j += blocksize) { // col block increaser
         for (int i = 0; i < N; i += blocksize) { // row block increaser

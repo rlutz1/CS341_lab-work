@@ -14,43 +14,83 @@ void printM(int M, int N, int B[M][N]) {
 // running with 344 misses, which is super close
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     // int blocksize = 8;
-    int blocksize = 4;
-
-     for (int j = 0; j < M; j += blocksize) { // col block increaser
-      for (int i = 0; i < N; i += blocksize) { // row block increaser
-     
-          
-        //// EHHHHHHHHHHHHH, idk that this is possible
-          // for (int ii = i, B_row = i + blocksize; ii < i + blocksize; ii++, B_row--) {
-          //   for (int jj = j, A_col = j + blocksize; jj < j + blocksize; ++jj, A_col--) {
-          
-          //         B[B_row][jj] = A[ii][A_col];
-          //         printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", B_row, jj, A[ii][A_col]);
-          //         printM(M, N, B);
-                
-                 
-          //     }
-
-            for (int ii = i; ii < i + blocksize; ++ii) {
-             for (int jj = j; jj < j + blocksize; ++jj) {
-          
-                  B[jj][ii] = A[ii][jj];
-                  printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-                  printM(M, N, B);
-                
-                 
-              }
-          }
-              // for (int jj = j; jj < j + blocksize; ++jj) {
-          
-              //     B[jj][ii] = A[ii][jj];
-              //     printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-              //     printM(M, N, B);
-                
-                 
-              // }
-          }
+    int blocksize = 8;
+    int temp;
+    // copy in A
+    for (int j = 0; j < M; j++) { // col block increaser
+      for (int i = 0; i < N; i++) { // row block increaser
+        B[j][i] = A[j][i];
       }
+    }
+    printM(M, N, B);
+    int control;
+    for (int j = 0; j < M; j += blocksize) { // col block increaser
+      // for (int i = 0; i < N; i += blocksize) { // row block increaser
+        control = 0;
+
+        
+        for (int total_times_in_block = 0; total_times_in_block < blocksize - 1; total_times_in_block++) {
+          
+          for (int b_row = j + 1; b_row < (j + blocksize - control); b_row++) {
+
+            for (int b_col = j + control; b_col < (j + blocksize - 1); b_col++) {
+            
+              temp = B[b_row][b_col];
+              B[b_row][b_col] = B[b_row - 1][b_col + 1];
+              B[b_row - 1][b_col + 1] = temp;
+              printM(M, N, B);
+              printf("\n");
+            }
+
+          }
+
+          control++;
+
+        }
+        
+
+            // let's try a different access pattern
+            // for (int ii = i; ii < i + blocksize; ++ii) { // block iterators
+            //   for (int jj = j; jj < j + blocksize; ++jj) {
+
+                // for (int outer = 0; outer < lim; outer++) { // need this to run 3 times
+                //   for (int finally = 0; finally < lim - dec; finally++) { // let this row repeat 3 times
+                //     // int b_row = j + 1 + finally;
+                //     for (int b_row = j + 1; b_row < j + blocksize - dec; b_row++) {
+                //       for (int b_col = i + dec; b_col < i + blocksize - 1; b_col++) {
+
+                //       temp = B[b_row][b_col];
+                //       B[b_row][b_col] = B[b_row - 1][b_col + 1];
+                //       B[b_row - 1][b_col + 1] = temp;
+                //       printf("did something: \n");
+                //       printM(M, N, B);
+
+                //     }
+
+                //     dec++;
+
+                //    }
+                  // }
+                  
+                  
+                // }
+                
+                
+
+              // }
+            }
+          
+            // // current correct version
+            // for (int ii = i; ii < i + blocksize; ++ii) {
+            //  for (int jj = j; jj < j + blocksize; ++jj) {
+          
+            //       B[jj][ii] = A[ii][jj];
+            //       printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
+            //       printM(M, N, B);  
+            //   }
+            // }
+             
+     
     
 
     // // she said something about the diagonals
@@ -320,14 +360,14 @@ int main() {
   // };
 
   // int B[4][4] = {0};
-  const int size = 64;
+  const int size = 8;
   int M = size; int N = size;
   int A[size][size];
   int B[size][size];
 
   init(M, N, A);
 
-  best_64(M, N, A, B);
+  best_32(M, N, A, B);
 
    printf("done:\n");
   printM(M, N, B);
