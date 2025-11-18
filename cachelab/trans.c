@@ -46,12 +46,18 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 
 }
 
+/**
+ * BAD ATTEMPT
+ * has WAY more accesses in general, which is a problem.
+ */
 char blocking_attempt[] = "Blocking Attempt";
 void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
     int last_size = N; // we are assuming M == N here!
+    // int last_size = N / (32 / 4); // N / 8
     int row;
     int col; 
+    int temp; // adding temp makes no difference.
 
      for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
 
@@ -69,17 +75,19 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
                 for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
                       
                     col = col_jumper + (col_counter % log);
-
-                    B[row][col] = A[col][row];
+                    temp = A[col][row];
+                    B[row][col] = temp;
                     
                 }
               }
+            //   B[row][row] = A[row][row];
             }
         }
         last_size /= 2;
     }
 
-    last_size = N; // we are assuming M == N here!
+    // last_size = N / (32 / 4); // N / 8
+    last_size = N;
 
     for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
 
@@ -97,8 +105,8 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
                 for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
                       
                     col = col_jumper + (col_counter % log);
-
-                    B[col][row] = A[row][col]; // i think this could be a major problem.
+                    temp = A[row][col]; 
+                    B[col][row] = temp; // i think this could be a major problem.
                     
                 }
               }
@@ -107,7 +115,7 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
         last_size /= 2;
     }
 
-
+    // don't like this
     for (int i = 0; i < N; i++) {
       B[i][i] = A[i][i];
     }

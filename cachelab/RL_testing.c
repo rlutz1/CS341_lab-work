@@ -1,5 +1,22 @@
 #include <stdio.h>
 
+
+void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
+  int blocksize = N / sizeof(int); // for now
+
+   for (int i = 0; i < N; i += blocksize) { // row block increaser
+    for (int j = 0; j < M; j += blocksize) { // col block increaser
+        
+        for (int ii = i; ii < i + blocksize; ii++) {
+            for (int jj = j; jj < j + blocksize; jj++) {
+                B[ii + jj*N][jj] = A[jj + ii*N][ii];
+            }
+        }
+    }
+}
+}
+
+
 void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
     int last_size = N; // we are assuming M == N here!
@@ -126,10 +143,10 @@ int main() {
   // };
 
   // int B[4][4] = {0};
-
-  int M = 32; int N = 32;
-  int A[32][32] = {0};
-  int B[32][32] = {0};
+  const int size = 2;
+  int M = size; int N = size;
+  int A[size][size];
+  int B[size][size];
 
   init(M, N, A);
 
