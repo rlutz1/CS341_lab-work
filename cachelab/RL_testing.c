@@ -9,11 +9,12 @@ void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
         
         for (int ii = i; ii < i + blocksize; ii++) {
             for (int jj = j; jj < j + blocksize; jj++) {
-                B[ii + jj*N][jj] = A[jj + ii*N][ii];
+                B[jj][ii] = A[ii][jj];
+                printf("setting (%d, %d) to (%d, %d) \n", jj, ii, ii, jj);
             }
         }
     }
-}
+  }
 }
 
 
@@ -119,7 +120,7 @@ void init(int M, int N, int A[N][M]) {
 }
 
 int main() {
-
+  // printf("jsadksnd");
   // int M = 8;
   // int N = 8;
   // int A[8][8] = { {1, 2, 3, 4, 5, 6, 7, 8},
@@ -143,14 +144,14 @@ int main() {
   // };
 
   // int B[4][4] = {0};
-  const int size = 2;
+  const int size = 8;
   int M = size; int N = size;
   int A[size][size];
   int B[size][size];
 
   init(M, N, A);
 
-  blocker(M, N, A, B);
+  blocker_2(M, N, A, B);
 
   for (int i = 0; i < M; i++) {
     for (int j = 0; j < N; j++) {
@@ -158,5 +159,7 @@ int main() {
     }
     printf("\n");
   }
+
+  printf("done");
   return 0;
 }

@@ -122,6 +122,22 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
 } // end method
 
+char better_blocking_attempt[] = "Hopefully a Better Blocking Attempt";
+void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
+  int blocksize = N / sizeof(int); // for now
+
+   for (int i = 0; i < N; i += blocksize) { // row block increaser
+    for (int j = 0; j < M; j += blocksize) { // col block increaser
+        
+        for (int ii = i; ii < i + blocksize; ii++) {
+            for (int jj = j; jj < j + blocksize; jj++) {
+                B[jj][ii] = A[ii][jj];
+            }
+        }
+    }
+  }
+}
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -139,7 +155,7 @@ void registerFunctions()
 
     /* Roxanne fooling around */
     registerTransFunction(blocker, blocking_attempt); 
-
+    registerTransFunction(blocker_2, better_blocking_attempt); 
 }
 
 /* 
