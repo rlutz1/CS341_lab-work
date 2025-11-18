@@ -49,6 +49,9 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
     }
 
 
+    for (int i = 0; i < N; i++) {
+      B[i][i] = A[i][i];
+    }
 
     // for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
     //     printf("log is %d\n", log);
@@ -90,6 +93,14 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
 } // end method
 
+void init(int M, int N, int A[N][M]) {
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+      A[i][j] = j;
+    }
+  }
+}
+
 int main() {
 
   // int M = 8;
@@ -105,16 +116,22 @@ int main() {
   //               };
 
   // int B[8][8] = {0};
-  int M = 4; int N = 4;
+  // int M = 4; int N = 4;
 
-  int A[4][4] = {
-    {1, 2, 3, 4},
-    {1, 2, 3, 4},
-    {1, 2, 3, 4},
-    {1, 2, 3, 4}
-  };
+  // int A[4][4] = {
+  //   {1, 2, 3, 4},
+  //   {1, 2, 3, 4},
+  //   {1, 2, 3, 4},
+  //   {1, 2, 3, 4}
+  // };
 
-  int B[4][4] = {0};
+  // int B[4][4] = {0};
+
+  int M = 32; int N = 32;
+  int A[32][32] = {0};
+  int B[32][32] = {0};
+
+  init(M, N, A);
 
   blocker(M, N, A, B);
 
