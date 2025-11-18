@@ -122,9 +122,9 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
 } // end method
 
-char better_blocking_attempt[] = "Hopefully a Better Blocking Attempt";
-void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
-  int blocksize = N / sizeof(int); // for now
+char best_32_func[] = "Best For 32";
+void best_32(int M, int N, int A[N][M], int B[M][N]) {
+    int blocksize = 8;
 
    for (int i = 0; i < N; i += blocksize) { // row block increaser
     for (int j = 0; j < M; j += blocksize) { // col block increaser
@@ -137,6 +137,25 @@ void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
     }
   }
 }
+
+
+char best_64_func[] = "Best For 64";
+void best_64(int M, int N, int A[N][M], int B[M][N]) {
+   int blocksize = 8;
+   int test = 32;
+   
+   for (int i = 0; i < N; i += blocksize) { // row block increaser
+    for (int j = 0; j < M; j += blocksize) { // col block increaser
+        
+        for (int ii = i; ii < i + blocksize; ii++) {
+            for (int jj = j; jj < j + blocksize; jj++) {
+                B[jj][ii] = A[ii][jj];
+            }
+        }
+    }
+  }
+}
+
 
 /*
  * registerFunctions - This function registers your transpose
@@ -154,8 +173,9 @@ void registerFunctions()
     registerTransFunction(trans, trans_desc); 
 
     /* Roxanne fooling around */
-    registerTransFunction(blocker, blocking_attempt); 
-    registerTransFunction(blocker_2, better_blocking_attempt); 
+    // registerTransFunction(blocker, blocking_attempt); 
+    registerTransFunction(best_32, best_32_func); 
+    registerTransFunction(best_64, best_64_func); 
 }
 
 /* 

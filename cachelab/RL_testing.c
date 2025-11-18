@@ -1,8 +1,9 @@
 #include <stdio.h>
 
-
-void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
-  int blocksize = N / sizeof(int); // for now
+// best for 32 SO FAR
+// running with 344 misses, which is super close
+void best_32(int M, int N, int A[N][M], int B[M][N]) {
+    int blocksize = 8;
 
    for (int i = 0; i < N; i += blocksize) { // row block increaser
     for (int j = 0; j < M; j += blocksize) { // col block increaser
@@ -10,7 +11,23 @@ void blocker_2(int M, int N, int A[N][M], int B[M][N]) {
         for (int ii = i; ii < i + blocksize; ii++) {
             for (int jj = j; jj < j + blocksize; jj++) {
                 B[jj][ii] = A[ii][jj];
-                printf("setting (%d, %d) to (%d, %d) \n", jj, ii, ii, jj);
+            }
+        }
+    }
+  }
+}
+
+// work on something here...
+void best_64(int M, int N, int A[N][M], int B[M][N]) {
+   int blocksize = 8;
+  //  int test = 32;
+   
+   for (int i = 0; i < N; i += blocksize) { // row block increaser
+    for (int j = 0; j < M; j += blocksize) { // col block increaser
+        
+        for (int ii = i; ii < i + blocksize; ii++) {
+            for (int jj = j; jj < j + blocksize; jj++) {
+                B[jj][ii] = A[ii][jj];
             }
         }
     }
