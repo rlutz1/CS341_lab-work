@@ -46,6 +46,31 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 
 }
 
+char blocking_attempt[] = "Blocking Attempt";
+void blocker(int M, int N, int A[N][M], int B[M][N]) {
+
+    int last_size = N; // we are assuming M == N here!
+    int row;
+    int col;
+
+    for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
+
+        for (int jumper = 0; jumper < N - 1; jumper += last_size) { // size to jump for next block
+            
+            for(int iterator = 0; iterator < log; iterator++) { // 0 -> 4, 0 -> 2, 0 -> 1
+
+                col = jumper + iterator;
+                row = log + col;
+                B[row][col] = A[col][row];
+                B[col][row] = A[row][col];
+
+            }
+        }
+        last_size /= 2;
+    }
+
+} // end method
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -60,6 +85,9 @@ void registerFunctions()
 
     /* Register any additional transpose functions */
     registerTransFunction(trans, trans_desc); 
+
+    /* Roxanne fooling around */
+    registerTransFunction(blocker, blocking_attempt); 
 
 }
 
