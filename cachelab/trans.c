@@ -187,8 +187,9 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
                 for (int ii = i; ii < i + blocksize; ii++) {
                     temp = A[ii][ii]; // load up A
                     for (int jj = j; jj < j + blocksize; jj++) {
-                        if (jj != ii) 
-                        B[jj][ii] = A[ii][jj];
+                        if (jj != ii) {
+                            B[jj][ii] = A[ii][jj];
+                        }
                     }
                     B[ii][ii] = temp; // load up b for next it
                 }
