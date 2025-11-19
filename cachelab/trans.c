@@ -35,14 +35,68 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 char trans_desc[] = "Simple row-wise scan transpose";
 void trans(int M, int N, int A[N][M], int B[M][N])
 {
-    int i, j, tmp;
 
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < M; j++) {
+int i, j, tmp;
+  int diag;
+
+    for (i = 0; i < N; i++) { // backwards rows
+      diag = A[i][i];
+      for (j = 0; j < M; j++) { // backward cols
+          if (i != j) {
             tmp = A[i][j];
             B[j][i] = tmp;
-        }
-    }    
+          }
+      }
+      B[i][i] = diag;
+    }
+
+// int i, j, tmp;
+//   int diag;
+
+//     for (i = N - 1; i >= 0; i--) { // backwards rows
+//       diag = A[i][i];
+//       for (j = M - 1; j >= 0; j--) { // backward cols
+//           if (i != j) {
+//             tmp = A[i][j];
+//             B[j][i] = tmp;
+//           }
+//       }
+//       B[i][i] = diag;
+//     }
+
+// does a teensy worse as expected
+//  int i, j, tmp;
+
+//     for (i = 0; i < N; i++) {
+//         for (j = 0; j < M; j++) {
+//             if (i != j) {
+//                 tmp = A[i][j];
+//                 B[j][i] = tmp;
+//             }
+            
+//         }
+//     } 
+
+    // for (i = 0; i < N; i++) {
+    //     tmp = A[i][i];
+    //     B[i][i] = tmp;
+    // }
+
+
+    // int i, j, tmp;
+
+    // for (i = 0; i < N; i++) {
+    //     for (j = 0; j < M; j++) {
+    //         tmp = A[i][j];
+    //         B[j][i] = tmp;
+    //     }
+    // } 
+    // for (i = 0; i < N; i++) {
+    //     for (j = 0; j < M; j++) {
+    //         tmp = A[i][j];
+    //         B[j][i] = tmp;
+    //     }
+    // }    
 
 }
 
@@ -125,14 +179,24 @@ void blocker(int M, int N, int A[N][M], int B[M][N]) {
 char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
-
-    // this goes left -> right
-    for (int j = 0; j < M; j += blocksize) { // col block increaser
-        for (int i = 0; i < N; i += blocksize) { // row block increaser
-     
-            for (int ii = i; ii < i + blocksize; ++ii) {
-                for (int jj = j; jj < j + blocksize; ++jj) {
-                    B[jj][ii] = A[ii][jj];
+    int temp;
+     // this goes left -> right
+    for (int i = 0; i < N; i += blocksize) { // row block increaser
+        for (int j = 0; j < M; j += blocksize) { // col block increaser
+            if (i == j) {
+                for (int ii = i; ii < i + blocksize; ii++) {
+                    temp = A[ii][ii]; // load up A
+                    for (int jj = j; jj < j + blocksize; jj++) {
+                        if (jj != ii) 
+                        B[jj][ii] = A[ii][jj];
+                    }
+                    B[ii][ii] = temp; // load up b for next it
+                }
+            } else {
+                for (int ii = i; ii < i + blocksize; ii++) {
+                    for (int jj = j; jj < j + blocksize; jj++) {
+                        B[jj][ii] = A[ii][jj];
+                    }
                 }
             }
         }

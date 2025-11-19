@@ -1,0 +1,49 @@
+    // this goes left -> right
+
+//     for (int j = 0; j < M; j += blocksize) { // col block increaser
+//       for (int i = 0; i < N; i += blocksize) { // row block increaser
+//         // skip the first row
+//         // THIS ASSUMES EVEN DIMENSIONS!!!!!!!!!!!!!
+//           for (int ii = i; ii < i + blocksize; ii += 2) {
+//               for (int jj = j; jj < j + blocksize; jj += 2) {
+//                   B[jj][ii] = A[ii][jj];
+//                   if (ii + 1 < i + blocksize && jj + 1 < j + blocksize) {
+//                     B[jj][ii + 1] = A[ii + 1][jj];
+//                     B[jj + 1][ii] = A[ii][jj + 1];
+//                     B[jj + 1][ii + 1] = A[ii + 1][jj + 1];
+//                   }
+                  
+//               }
+//           }
+//           // much worse
+//         //   for (int jj = 0;  jj < j + blocksize; jj++) {
+//         //     B[jj][0] = A[0][jj];
+//         //   }
+//       }
+//    
+//   }
+
+//   for (int j = 0; j < M; j += blocksize) { // col block increaser
+//       for (int i = 0; i < N; i += blocksize) { // row block increaser
+//         // THIS ASSUMES EVEN DIMENSIONS!!!!!!!!!!!!!
+//           for (int ii = i; ii < i + blocksize; ii += 2) {
+//               for (int jj = j; jj < j + blocksize; jj += 2) {
+//                   B[jj][ii] = A[ii][jj];
+//                   B[jj][ii + 1] = A[ii + 1][jj];
+//                   B[jj + 1][ii] = A[ii][jj + 1];
+//                   B[jj + 1][ii + 1] = A[ii + 1][jj + 1];
+//               }
+//           }
+//       }
+//   }
+
+// still worse even with different access pattern
+  // THIS ASSUMES EVEN DIMENSIONS!!!!!!!!!!!!!
+        //   for (int ii = i; ii < i + blocksize; ii += 2) {
+        //       for (int jj = j; jj < j + blocksize; jj += 2) {
+        //           B[jj][ii] = A[ii][jj];
+        //           B[jj][ii + 1] = A[ii + 1][jj];
+        //           B[jj + 1][ii] = A[ii][jj + 1];
+        //           B[jj + 1][ii + 1] = A[ii + 1][jj + 1];
+        //       }
+        //   }

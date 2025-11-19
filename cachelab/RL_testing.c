@@ -13,72 +13,127 @@ void printM(int M, int N, int B[M][N]) {
 // best for 32 SO FAR
 // running with 344 misses, which is super close
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
-    // int blocksize = 8;
-    int blocksize = 8;
-    int temp;
-    // copy in A
-    for (int j = 0; j < M; j++) { // col block increaser
-      for (int i = 0; i < N; i++) { // row block increaser
-        B[j][i] = A[j][i];
-      }
-    }
-    printM(M, N, B);
-    int control;
-    for (int j = 0; j < M; j += blocksize) { // col block increaser
-      // for (int i = 0; i < N; i += blocksize) { // row block increaser
-        control = 0;
+  // int blocksize = 8;
+  int blocksize = 8;
 
-        
-        for (int total_times_in_block = 0; total_times_in_block < blocksize - 1; total_times_in_block++) {
-          
-          for (int b_row = j + 1; b_row < (j + blocksize - control); b_row++) {
+  // // this goes left -> right
+  // for (int j = 0; j < M; j += blocksize) { // col block increaser
+  //     for (int i = 0; i < N; i += blocksize) { // row block increaser
+    
+  //         for (int ii = i; ii < i + blocksize; ii++) {
+  //             for (int jj = j; jj < j + blocksize; jj++) {
+  //                 B[jj][ii] = A[ii][jj];
+  //             }
+  //         }
+  //     }
+  //}
 
-            for (int b_col = j + control; b_col < (j + blocksize - 1); b_col++) {
-            
-              temp = B[b_row][b_col];
-              B[b_row][b_col] = B[b_row - 1][b_col + 1];
-              B[b_row - 1][b_col + 1] = temp;
-              printM(M, N, B);
-              printf("\n");
-            }
-
+  // this goes left -> right
+  for (int j = 0; j < M; j += blocksize) { // col block increaser
+      for (int i = 0; i < N; i += blocksize) { // row block increaser
+        // THIS ASSUMES EVEN DIMENSIONS!!!!!!!!!!!!!
+          for (int ii = i; ii < i + blocksize; ii += 2) {
+              for (int jj = j; jj < j + blocksize; jj += 2) {
+                  B[jj][ii] = A[ii][jj];
+                  B[jj][ii + 1] = A[ii + 1][jj];
+                  B[jj + 1][ii] = A[ii][jj + 1];
+                  B[jj + 1][ii + 1] = A[ii + 1][jj + 1];
+              }
           }
+      }
+  }
 
-          control++;
 
-        }
+
+
+  // // copy in A
+  //   for (int j = 0; j < M; j++) { // col block increaser
+  //     for (int i = 0; i < N; i++) { // row block increaser
+  //       B[j][i] = A[j][i];
+  //     }
+  //   }
+  //   int temp;
+  //  // this goes left -> right
+  // for (int i = 0; i < N; i += blocksize) { // row block increaser
+  //   for (int j = 0; j < M; j += blocksize) { // col block increaser
+     
+    
+  //         for (int ii = i; ii < i + blocksize; ii++) {
+  //             for (int jj = i + 1; jj < j + blocksize; jj++) {
+  //                 temp = B[ii][jj];
+  //                 B[ii][jj] = B[jj][ii];
+  //                 B[jj][ii] = temp;
+  //             }
+  //         }
+  //     }
+  // }
+
+    // int blocksize = 8;
+    // int blocksize = 8;
+    // int temp;
+    // // copy in A
+    // for (int j = 0; j < M; j++) { // col block increaser
+    //   for (int i = 0; i < N; i++) { // row block increaser
+    //     B[j][i] = A[j][i];
+    //   }
+    // }
+    // printM(M, N, B);
+    // int control;
+    // for (int j = 0; j < M; j += blocksize) { // col block increaser
+    //   // for (int i = 0; i < N; i += blocksize) { // row block increaser
+    //     control = 0;
+
+        
+    //     for (int total_times_in_block = 0; total_times_in_block < blocksize - 1; total_times_in_block++) {
+          
+    //       for (int b_row = j + 1; b_row < (j + blocksize - control); b_row++) {
+
+    //         for (int b_col = j + control; b_col < (j + blocksize - 1); b_col++) {
+            
+    //           temp = B[b_row][b_col];
+    //           B[b_row][b_col] = B[b_row - 1][b_col + 1];
+    //           B[b_row - 1][b_col + 1] = temp;
+    //           printM(M, N, B);
+    //           printf("\n");
+    //         }
+
+    //       }
+
+    //       control++;
+
+    //     }
         
 
-            // let's try a different access pattern
-            // for (int ii = i; ii < i + blocksize; ++ii) { // block iterators
-            //   for (int jj = j; jj < j + blocksize; ++jj) {
+    //         // let's try a different access pattern
+    //         // for (int ii = i; ii < i + blocksize; ++ii) { // block iterators
+    //         //   for (int jj = j; jj < j + blocksize; ++jj) {
 
-                // for (int outer = 0; outer < lim; outer++) { // need this to run 3 times
-                //   for (int finally = 0; finally < lim - dec; finally++) { // let this row repeat 3 times
-                //     // int b_row = j + 1 + finally;
-                //     for (int b_row = j + 1; b_row < j + blocksize - dec; b_row++) {
-                //       for (int b_col = i + dec; b_col < i + blocksize - 1; b_col++) {
+    //             // for (int outer = 0; outer < lim; outer++) { // need this to run 3 times
+    //             //   for (int finally = 0; finally < lim - dec; finally++) { // let this row repeat 3 times
+    //             //     // int b_row = j + 1 + finally;
+    //             //     for (int b_row = j + 1; b_row < j + blocksize - dec; b_row++) {
+    //             //       for (int b_col = i + dec; b_col < i + blocksize - 1; b_col++) {
 
-                //       temp = B[b_row][b_col];
-                //       B[b_row][b_col] = B[b_row - 1][b_col + 1];
-                //       B[b_row - 1][b_col + 1] = temp;
-                //       printf("did something: \n");
-                //       printM(M, N, B);
+    //             //       temp = B[b_row][b_col];
+    //             //       B[b_row][b_col] = B[b_row - 1][b_col + 1];
+    //             //       B[b_row - 1][b_col + 1] = temp;
+    //             //       printf("did something: \n");
+    //             //       printM(M, N, B);
 
-                //     }
+    //             //     }
 
-                //     dec++;
+    //             //     dec++;
 
-                //    }
-                  // }
+    //             //    }
+    //               // }
                   
                   
-                // }
+    //             // }
                 
                 
 
-              // }
-            }
+    //           // }
+    //         }
           
             // // current correct version
             // for (int ii = i; ii < i + blocksize; ++ii) {
@@ -335,6 +390,26 @@ void init(int M, int N, int A[N][M]) {
   }
 }
 
+void normal(int M, int N, int A[N][M], int B[M][N]) {
+  int i, j, tmp;
+  int diag;
+
+    for (i = N - 1; i >= 0; i--) { // backwards rows
+      diag = A[i][i];
+      for (j = M - 1; j >= 0; j--) { // backward cols
+          if (i != j) {
+            tmp = A[i][j];
+            B[j][i] = tmp;
+          }
+          
+
+          printf("\n");
+          printM(M, N, B);
+      }
+      B[i][i] = diag;
+    }
+}
+
 int main() {
   // printf("jsadksnd");
   // int M = 8;
@@ -360,15 +435,15 @@ int main() {
   // };
 
   // int B[4][4] = {0};
-  const int size = 8;
+  const int size = 32;
   int M = size; int N = size;
   int A[size][size];
   int B[size][size];
 
   init(M, N, A);
 
+  // best_32(M, N, A, B);
   best_32(M, N, A, B);
-
    printf("done:\n");
   printM(M, N, B);
   
