@@ -207,43 +207,44 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
 
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
-    // int blocksize = 4;
-    // int temp;
-    //  // this goes left -> right
-    // for (int i = 0; i < N; i += blocksize) { // row block increaser
-    //     for (int j = 0; j < M; j += blocksize) { // col block increaser
-    //         if (i == j) {
-    //             for (int ii = i; ii < i + blocksize; ii++) {
-    //                 temp = A[ii][ii]; // load up A
-    //                 for (int jj = j; jj < j + blocksize; jj++) {
-    //                     if (jj != ii) 
-    //                     B[jj][ii] = A[ii][jj];
-    //                 }
-    //                 B[ii][ii] = temp; // load up b for next it
-    //             }
-    //         } else {
-    //             for (int ii = i; ii < i + blocksize; ii++) {
-    //                 for (int jj = j; jj < j + blocksize; jj++) {
-    //                     B[jj][ii] = A[ii][jj];
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    int blocksize = 4; // seems like out incers don't actually matter, this DOES
-    
-    // this goes left -> right
+    int blocksize = 4;
+    int temp;
+     // this goes left -> right
     for (int j = 0; j < M; j += blocksize) { // col block increaser
-        for (int i = 0; i < N; i += blocksize) { // row block increaser
-     
-            for (int ii = i; ii < i + blocksize; ii++) {
-                for (int jj = j; jj < j + blocksize; jj++) {
-                    B[jj][ii] = A[ii][jj];
+
+    for (int i = 0; i < N; i += blocksize) { // row block increaser
+            if (i == j) {
+                for (int ii = i; ii < i + blocksize; ii++) {
+                    temp = A[ii][ii]; // load up A
+                    for (int jj = j; jj < j + blocksize; jj++) {
+                        if (jj != ii) 
+                        B[jj][ii] = A[ii][jj];
+                    }
+                    B[ii][ii] = temp; // load up b for next it
+                }
+            } else {
+                for (int ii = i; ii < i + blocksize; ii++) {
+                    for (int jj = j; jj < j + blocksize; jj++) {
+                        B[jj][ii] = A[ii][jj];
+                    }
                 }
             }
         }
     }
+
+    // int blocksize = 4; // seems like out incers don't actually matter, this DOES
+    
+    // // this goes left -> right
+    // for (int j = 0; j < M; j += blocksize) { // col block increaser
+    //     for (int i = 0; i < N; i += blocksize) { // row block increaser
+     
+    //         for (int ii = i; ii < i + blocksize; ii++) {
+    //             for (int jj = j; jj < j + blocksize; jj++) {
+    //                 B[jj][ii] = A[ii][jj];
+    //             }
+    //         }
+    //     }
+    // }
 //   int blocksize = 4;
 //   int inc = 64;
 
