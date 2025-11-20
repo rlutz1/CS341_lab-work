@@ -250,6 +250,7 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
   // new attempt
   int blocksize = 8; // first to 8 for the diags
   int i; int j; int ii; int jj;
+  int ff;
 
   // step 1: handle the diagonals.
 
@@ -329,11 +330,43 @@ blocksize = 4;
 
   }
 
-
+  printf("filled in diags: \n");
   printM(M,N,B);
 
 
   blocksize = 4;
+
+  // now, next step is that we need to do these little L's under the diagonal
+  i = 0; j = 8; ff = 0;
+  for (i = 0, j = 8; i < M; i += 8, j += 8) {
+    for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+        for (jj = j; jj < j + blocksize; jj++) {
+            B[jj][ii] = A[ii][jj];
+        }
+    }
+
+    for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+        for (jj = j; jj < j + blocksize; jj++) {
+            B[jj][ii] = A[ii][jj];
+        }
+    }
+
+    for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+            B[jj][ii] = A[ii][jj];
+        }
+    }
+  }
+
+  printf("filled in little ls\n");
+  printM(M,N,B);
+
+
+  // // now, to fill in the remainders
+  // i = 12; j = 0; ff = 0;
+  // for (int k = 1; k <= 7; k++) { // do it one less time than num diagonals
+  //   while ()
+  // }
 
 }
 
