@@ -277,40 +277,40 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 blocksize = 4;
   for (i = 0, j = 0; i < N; i += 8, j += 8) {
 
-    if (i < M - 8) { // NOT the last row
-
-      for (int ii = i; ii < i + blocksize; ii++) { // fill the top left square
+    if (i < M - 8) { // NOT the last row  
+      for (int ii = i; ii < i + blocksize; ii++) { // fill the upper left square
         for (int jj = j; jj < j + blocksize; jj++) {
-            B[jj][ii] = B[ii][jj + 8];
-        }
-      }
-
-      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
-        for (int jj = j; jj < j + blocksize; jj++) {
-            B[jj][ii] = B[ii][jj + 8];
-        }
-      }
-
-      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
-        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
             B[jj][ii] = B[ii][jj + 8];
         }
       }
 
       for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
         for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+            B[jj][ii] = B[ii][jj + 8];
+        }
+      }
+
+        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+            B[jj][ii] = B[ii][jj + 8];
+        }
+      }
+
+      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+        for (int jj = j; jj < j + blocksize; jj++) {
             B[jj][ii] = B[ii][jj + 8];
         }
       }
     } else {
-       for (int ii = i; ii < i + blocksize; ii++) { // fill the top left square
+
+      for (int ii = i; ii < i + blocksize; ii++) { // fill the upper left square
         for (int jj = j; jj < j + blocksize; jj++) {
             B[jj][ii] = B[ii][jj - 8];
         }
       }
 
-      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
-        for (int jj = j; jj < j + blocksize; jj++) {
+      for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
             B[jj][ii] = B[ii][jj - 8];
         }
       }
@@ -321,51 +321,87 @@ blocksize = 4;
         }
       }
 
-      for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
-        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+        for (int jj = j; jj < j + blocksize; jj++) {
             B[jj][ii] = B[ii][jj - 8];
         }
       }
     }
-
   }
 
   printf("filled in diags: \n");
   printM(M,N,B);
 
-
   blocksize = 4;
 
-  // now, next step is that we need to do these little L's under the diagonal
-  i = 0; j = 8; ff = 0;
-  for (i = 0, j = 8; i < M; i += 8, j += 8) {
-    for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
-        for (jj = j; jj < j + blocksize; jj++) {
-            B[jj][ii] = A[ii][jj];
+  // try the square pattern used above
+  for (i = 0; i < N; i += 8) { // inc by 8 blocks here
+    for (j = 0; j < M; j += 8) {
+      if (!isDiagonal(i, j)) { // PLEASE don't redo the diagonals lol
+        // upper left 
+        for (int ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+          for (int jj = j; jj < j + blocksize; jj++) {
+              B[jj][ii] = A[ii][jj];
+          }
         }
-    }
 
-    for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
-        for (jj = j; jj < j + blocksize; jj++) {
-            B[jj][ii] = A[ii][jj];
+        for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+              B[jj][ii] = A[ii][jj];
+          }
         }
-    }
 
-    for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
-        for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
-            B[jj][ii] = A[ii][jj];
+        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+              B[jj][ii] = A[ii][jj];
+          }
         }
+
+        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+          for (int jj = j; jj < j + blocksize; jj++) {
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+
+        printf("filled in blocks at upper right corner (%d, %d): \n", j, i);
+        printM(M,N,B);
+      }
     }
   }
+  
 
-  printf("filled in little ls\n");
-  printM(M,N,B);
+  // // now, next step is that we need to do these little L's under the diagonal
+  // i = 0; j = 8; ff = 0;
+  // for (i = 0, j = 8; i < M; i += 8, j += 8) {
+  //   for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+  //       for (jj = j; jj < j + blocksize; jj++) {
+  //           B[jj][ii] = A[ii][jj];
+  //       }
+  //   }
+
+  //   for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+  //       for (jj = j; jj < j + blocksize; jj++) {
+  //           B[jj][ii] = A[ii][jj];
+  //       }
+  //   }
+
+  //   for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+  //       for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           B[jj][ii] = A[ii][jj];
+  //       }
+  //   }
+  // }
+
+  // printf("filled in little ls\n");
+  // printM(M,N,B);
 
 
   // // now, to fill in the remainders
-  // i = 12; j = 0; ff = 0;
+  // i = 0; j = 12; ff = 0;
   // for (int k = 1; k <= 7; k++) { // do it one less time than num diagonals
-  //   while ()
+  //   while (jj < N) { // while col traveller is still on the matrix
+
+  //   }
   // }
 
 }
