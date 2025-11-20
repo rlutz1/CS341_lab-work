@@ -231,161 +231,223 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
     // }
 }
 
+int isDiagonal(int i, int j) {
+  return (
+    (i < 8 && i >= 0) && (j < 8 && j >= 0) ||
+    (i < 16 && i >= 8) && (j < 16 && j >= 8) ||
+    (i < 24 && i >= 16) && (j < 24 && j >= 16) ||
+    (i < 32 && i >= 24) && (j < 32 && j >= 24) ||
+    (i < 40 && i >= 32) && (j < 40 && j >= 32) ||
+    (i < 48 && i >= 40) && (j < 48 && j >= 40) ||
+    (i < 56 && i >= 48) && (j < 56 && j >= 48) ||
+    (i < 64 && i >= 56) && (j < 64 && j >= 56) 
+  );
+}
+
 // work on something here...
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
-   int blocksize = 8;
-  //  int test = 32;
-   // try splitting into 2 blocks? of 32 size?
-  //  for (int k = 0; k < 4; k++) {
-  //   // printf("running\n");
 
-    for (int i = 0; i < 32; i += blocksize) { // row block increaser
-        for (int j = 0; j < 32; j += blocksize) { // col block increaser
-          
-          for (int ii = i; ii < i + blocksize; ii++) {
-              for (int jj = j; jj < j + blocksize; jj++) {
-                  printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-                  B[jj][ii] = A[ii][jj];
-              }
-          }
+ int blocksize = 4;
+ int temp;
+ int i;
+ int j; 
+ int ii;
+ int jj;
+ int ff = 0;
+ int a_row; int b_row; int a_col; int b_col;
+ // do the lower half in a zig zag pattern
+ // need to iterate 2 * N times, then - 2, then - 2
+  // need to start in upper left block, then down, then right, then down, then right....
+  // and a has to be opposite.
+  a_row = 0; a_col = 0; b_row = 0; b_col = 0; i = N; j = M;
+  for (int k = 1; k <= (N / 8); k++) {
+    while (a_col < i) {
+      // transpose this block
+      for (ii = a_row; ii < a_row + blocksize; ii++){
+        for (jj = a_col; jj < a_col + blocksize; jj++) {
+          B[jj][ii] = A[ii][jj];
+        }
+      }
+
+      if (ff == 0) {
+        a_col += blocksize;
+        ff = 1;
+      } else {  
+        a_row += blocksize;
+        ff = 0;
       }
     }
+    ff = 0;
+    a_row = 0;
+    a_col = 8 * k;
+  }
 
-    for (int i = 0; i < 32; i += blocksize) { // row block increaser
-        for (int j = 32; j < 64; j += blocksize) { // col block increaser
-          
-          for (int ii = i; ii < i + blocksize; ii++) {
-              for (int jj = j; jj < j + blocksize; jj++) {
-                  printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-                  B[jj][ii] = A[ii][jj];
-              }
-          }
+  ff = 0;
+  a_row = 4; a_col = 0; b_row = 0; b_col = 0; i = N; j = M;
+  for (int k = 1; k <= (N / 8); k++) {
+    while (a_row < i) {
+     
+      // transpose this block
+      for (ii = a_row; ii < a_row + blocksize; ii++){
+        for (jj = a_col; jj < a_col + blocksize; jj++) {
+          B[jj][ii] = A[ii][jj];
+        }
+      }
+
+      if (ff == 0) {
+        a_row += blocksize;
+        ff = 1;
+      } else {  
+        a_col += blocksize;
+        ff = 0;
       }
     }
+    ff = 0;
+    a_row = 8 * k;
+    a_col = 0;
+  }
+ 
+ 
 
-    for (int i = 32; i < 64; i += blocksize) { // row block increaser
-        for (int j = 0; j < 32; j += blocksize) { // col block increaser
-          
-          for (int ii = i; ii < i + blocksize; ii++) {
-              for (int jj = j; jj < j + blocksize; jj++) {
-                  printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-                  B[jj][ii] = A[ii][jj];
-              }
-          }
-      }
-    }
+  printf("maybe along diag?\n");
+  printM(M, N, B);
 
-    for (int i = 32; i < 64; i += blocksize) { // row block increaser
-        for (int j = 32; j < 64; j += blocksize) { // col block increaser
+
+//  ii = 0;
+//  for (int k = (2 * N); k >= 2; k -= 2) {
+//   jj = 0; 
+//   for (int b_walker = 0; b_walker < k; b_walker) {
+//     B[ii]
+//   }
+//   ii += 2;
+//   for (int j = 0; j < M; j += blocksize) {
+//     for (int i = 0; i < N; i += blocksize) {
+ 
+//     for (ii = i; ii < i + blocksize; ii++){
+//       for (jj = i; jj < i + blocksize; jj++) {
+//         B[jj][ii] = A[ii][jj];
+//       }
+//     }
+//   }
+//  } 
+//  }
+// for (int j = 0; j < M; j += blocksize) {
+//   for (int i = 0; i < N; i += blocksize) {
+ 
+//     for (ii = i; ii < i + blocksize; ii++){
+//       for (jj = i; jj < i + blocksize; jj++) {
+//         B[jj][ii] = A[ii][jj];
+//       }
+//     }
+//   }
+//  } 
+
+// // STEP 1, place the contents of Diags of A into right shifted diags of B
+// for (i = 0; i < N - blocksize; i += blocksize) {
+//   for (ii = i; ii < i + blocksize; ii++){
+//     for (jj = i; jj < i + blocksize; jj++) {
+//       B[ii][jj + blocksize] = A[ii][jj];
+//     }
+//   }
+// } 
+
+
+
+// blocksize = 4;
+// // STEP 2, somewhat normal transpose for all cases except diagonal
+  
+//    for (i = 0; i < N; i += blocksize) { // row block increaser
+//       for (j = 0; j < M; j += blocksize) { // col block increaser
           
-          for (int ii = i; ii < i + blocksize; ii++) {
-              for (int jj = j; jj < j + blocksize; jj++) {
-                  printf("EXCHANGE PERFORMED: (%d, %d) is now %d\n", jj, ii, A[ii][jj]);
-                  B[jj][ii] = A[ii][jj];
-              }
-          }
-      }
-    }
-  //  }
+//           // if (i == j || (j - blocksize) == i || (i - blocksize) == j) { // DIAGONAL 8 BLOCK
+//           if (isDiagonal(i, j)) { // for now since buggy
+
+//             if (j < M - 8) { // NOT the last row
+//               for (int ii = i; ii < i + blocksize; ii++) { // reach ahead and pull from B!
+//                   for (int jj = j; jj < j + blocksize; jj++) {
+//                       B[jj][ii] = B[ii][jj + 8];
+//                   }
+//               }
+//             } else { // mitigate damage on final diag block
+//                  for (int ii = i; ii < i + blocksize; ii++) {
+//                   temp = A[ii][ii]; // load up A
+//                   for (int jj = j; jj < j + blocksize; jj++) {
+//                       if (jj != ii) {
+//                           B[jj][ii] = A[ii][jj];
+//                       }
+//                   }
+//                   B[ii][ii] = temp; // load up b for next it
+//               }
+//             }
+//             // printf("diag at (%d, %d)\n", i, j);
+           
+//           } else {
+//             // for (int ii = i; ii < i + blocksize; ii++) {
+//             //       for (int jj = j; jj < j + blocksize; jj++) {
+//             //           B[jj][ii] = A[ii][jj];
+//             //       }
+//             //   }
+//             if (j < M - 8) { // NOT the last row
+              
+
+//               for (int ii = i; ii < i + blocksize; ii++) {
+//                   for (int jj = j; jj < j + blocksize; jj++) {
+//                       B[jj][ii] = A[ii][jj];
+//                   }
+//               }
+//             }
+//           }
+       
+//       }
+  
+//     }
+
+
+
+// printM(M, N, B);
+
+  //   // this goes left -> right
+  // for (i = 0; i < N; i += blocksize) { // row block increaser
+  //     for (j = 0; j < M; j += blocksize) { // col block increaser
+          
+  //         if (i == j) {
+  //             for (int ii = i; ii < i + blocksize; ii++) {
+  //                 temp = A[ii][ii]; // load up A
+  //                 for (int jj = j; jj < j + blocksize; jj++) {
+  //                     if (jj != ii) {
+  //                         B[jj][ii] = A[ii][jj];
+  //                     }
+  //                 }
+  //                 B[ii][ii] = temp; // load up b for next it
+  //             }
+  //         } else {
+  //             for (int ii = i; ii < i + blocksize; ii++) {
+  //                 for (int jj = j; jj < j + blocksize; jj++) {
+  //                     B[jj][ii] = A[ii][jj];
+  //                 }
+  //             }
+  //         }
+          
+  //     }
+  
+  //   }
+
    
 }
 
-
-void blocker(int M, int N, int A[N][M], int B[M][N]) {
-
-    int last_size = N; // we are assuming M == N here!
-    int row;
-    int col; 
-    int for_row = 0;
-    int for_col = 0;
-
-     for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
-        printf("log is %d\n", log);
-
-        // will iterate 1, then 2, then 4...
-        for (int starting_place = 0; starting_place < N - 1; starting_place += last_size) { // size to jump for next block
-
-          for (int row_counter = 0; row_counter < log; row_counter++) { // needs to iterate 4 times
-          // row = log + jumper + (test % log); // + col _ shifter
-        
-              printf("starter is %d\n", starting_place);
-
-              // always start with log, offset by the jump, and through how many "last rows" we have
-              row = log + starting_place + (row_counter % log); 
-
-              // now, the columns...
-              // i guess we can just have its own jumper
-              for (int col_jumper = 0; col_jumper < N - 1; col_jumper += last_size) { // size to jump for next block
-                for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
-                    printf("iterator inner is %d\n", col_counter);
-                      
-                    col = col_jumper + (col_counter % log);
-                      
-                    printf("ACCESSING B: (%d, %d)\n", row, col);
-                    B[row][col] = A[col][row];
-                    B[col][row] = A[row][col];
-                  // for_col++;
-                }
-                // for_col = 0;
-              // // test++
-              // for_row++; 
-              }
-            }
-            // test = 0;
-            // for_row = 0;
-            
-        }
-        last_size /= 2;
-        
-    }
-
-
-   
-
-    // for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
-    //     printf("log is %d\n", log);
-
-        
-    //     for (int jumper = 0; jumper < N - 1; jumper += last_size) { // size to jump for next block
-
-    //       for (int grab_per_row = 0; grab_per_row < 4; grab_per_row++) { // needs to iterate 4 times
-    //       // row = log + jumper + (test % log); // + col _ shifter
-          
-
-    //           printf("jumper is %d\n", jumper);
-
-    //           row = log + jumper + (for_row % log);
-    //           // issue, need to stay on that row for longer
-
-
-    //           for(int col_shifter = 0; col_shifter < 4; col_shifter++) { // 0 -> 4, 0 -> 2, 0 -> 1
-    //               printf("iterator inner is %d\n", col_shifter);
-                    
-    //               col = jumper + (for_col % log);
-                    
-    //               printf("ACCESSING B: (%d, %d)\n", row, col);
-    //               B[row][col] = A[col][row];
-    //               B[col][row] = A[row][col];
-    //             for_col++;
-    //           }
-    //           for_col = 0;
-    //           // test++
-    //           for_row++; 
-    //         }
-    //         // test = 0;
-    //         for_row = 0;
-            
-    //     }
-    //     last_size /= 2;
-        
-    // }
-
-} // end method
 
 void init(int M, int N, int A[N][M]) {
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {
       A[i][j] = j;
+    }
+  }
+}
+
+void initZ(int M, int N, int A[N][M]) {
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+      A[i][j] = 0;
     }
   }
 }
@@ -441,11 +503,15 @@ int main() {
   int B[size][size];
 
   init(M, N, A);
-
+  initZ(M, N, B);
+  
   // best_32(M, N, A, B);
-  best_32(M, N, A, B);
+  best_64(M, N, A, B);
    printf("done:\n");
   printM(M, N, B);
+  
+  printf("A\n");
+  printM(M, N, A);
   
 
  
