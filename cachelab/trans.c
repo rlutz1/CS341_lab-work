@@ -204,24 +204,54 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
     }
 }
 
+ // for (ii = i + block_jump_right; ii > i - 1 ; ii--) {
+                //     temp = A[ii][ii]; // load up A
+                //     for (jj = j + block_jump_down; jj < j - 1; jj--) {
+                //         if (jj != ii)  {
+                //             B[jj][ii] = A[ii][jj];
+                //         }
+                //     }
+                //     B[ii][ii] = temp; // load up b for next it
+                // }
 
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
+
     int blocksize = 4;
     int temp;
      // this goes left -> right
-    for (int j = 0; j < M; j += blocksize) { // col block increaser
-
     for (int i = 0; i < N; i += blocksize) { // row block increaser
-            if (i == j) {
-                for (int ii = i; ii < i + blocksize; ii++) {
-                    temp = A[ii][ii]; // load up A
-                    for (int jj = j; jj < j + blocksize; jj++) {
-                        if (jj != ii) 
-                        B[jj][ii] = A[ii][jj];
-                    }
-                    B[ii][ii] = temp; // load up b for next it
+        for (int j = 0; j < M; j += blocksize) { // col block increaser
+            if (i == j || i - 1 == j + 1 || i + 1 == j - 1) {
+                int step = 1;
+                if (j % 8 != 0) {
+                    step = 2;
                 }
+                if (j + blocksize + step < N) {
+                    for (int ii = i; ii < i + blocksize; ii++) {
+                        for (int jj = j; jj < j + blocksize; jj++) {
+                            B[ii + step][jj] = A[ii][jj];
+                        }
+                    }
+                    for (int ii = i; ii < i + blocksize; ii++) {
+                        for (int jj = j; jj < j + blocksize; jj++) {
+                            B[jj][ii] = B[jj][ii + step];
+                        }
+                    }
+                } else {
+                    for (int ii = i; ii < i + blocksize; ii++) {
+                    
+                        temp = A[ii][ii]; // load up A
+                        for (int jj = j; jj < j + blocksize; jj++) {
+                            if (jj != ii) {
+                                B[jj][ii] = A[ii][jj];
+                            }
+                        }
+                        B[ii][ii] = temp; // load up b for next it
+                    }
+                }
+                
+                
             } else {
                 for (int ii = i; ii < i + blocksize; ii++) {
                     for (int jj = j; jj < j + blocksize; jj++) {
@@ -232,19 +262,96 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
         }
     }
 
-    // int blocksize = 4; // seems like out incers don't actually matter, this DOES
+    // int blocksize = 4;
+    // int block_jump_right = 4;
+    // int block_jump_down = 4;
+    // int i;
+    // int j;
+    // int ii;
+    // int jj;
+    // int temp;
+    //  // this goes left -> right
+   
     
-    // // this goes left -> right
-    // for (int j = 0; j < M; j += blocksize) { // col block increaser
-    //     for (int i = 0; i < N; i += blocksize) { // row block increaser
-     
-    //         for (int ii = i; ii < i + blocksize; ii++) {
-    //             for (int jj = j; jj < j + blocksize; jj++) {
-    //                 B[jj][ii] = A[ii][jj];
-    //             }
-    //         }
+    // for (i = 0; i < N; i += block_jump_right) { // row block increaser
+    //     for (j = 0; j < M; j += block_jump_down) { // col block increaser 
+            
+    //         // if (i - 1 == j + 1) { // theres a diagonal below me
+    //         //     // handle this row
+    //         //     for (ii = i; ii < i + block_jump_right; ii++) {
+    //         //         temp = A[ii][ii]; // load up A
+    //         //         for (jj = j; jj < j + block_jump_down; jj++) {
+    //         //             if (jj != ii)  {
+    //         //                 B[jj][ii] = A[ii][jj];
+    //         //             }
+    //         //         }
+    //         //         B[ii][ii] = temp; // load up b for next it
+    //         //     }
+    //         //     // deal with the diagonal
+    //         //     j += block_jump_down;
+    //         //     for (ii = i; ii < i + block_jump_right; ii++) {
+    //         //         temp = A[ii][ii]; // load up A
+    //         //         for (jj = j; jj < j + block_jump_down; jj++) {
+    //         //             if (jj != ii)  {
+    //         //                 B[jj][ii] = A[ii][jj];
+    //         //             }
+    //         //         }
+    //         //         B[ii][ii] = temp; // load up b for next it
+    //         //     }
+
+                
+    //         // } else if (j % 8 == 0 && j == i)  { // first diagonal
+    //         //     // need to potentially deal with diagonal itself
+    //         //     for (ii = i; ii < i + block_jump_right; ii++) {
+    //         //         temp = A[ii][ii]; // load up A
+    //         //         for (jj = j; jj < j + block_jump_down; jj++) {
+    //         //             if (jj != ii)  {
+    //         //                 B[jj][ii] = A[ii][jj];
+    //         //             }
+    //         //         }
+    //         //         B[ii][ii] = temp; // load up b for next it
+    //         //     }
+
+    //         //     // AND THEN we need to deal with the next row down
+    //         //     // which has a similar issue to the diagonal with 
+    //         //     // set conflicts
+    //         //     j += block_jump_down;
+                
+    //         //     for (ii = i; ii < i + block_jump_right; ii++) {
+    //         //         temp = A[ii][ii]; // load up A
+    //         //         for (jj = j; jj < j + block_jump_down; jj++) {
+    //         //             if (jj != ii)  {
+    //         //                 B[jj][ii] = A[ii][jj];
+    //         //             }
+    //         //         }
+    //         //         B[ii][ii] = temp; // load up b for next it
+    //         //     }
+
+               
+                
+    //         // } else {
+    //         //     for (ii = i; ii < i + block_jump_right; ii++) {
+    //         //          for (jj = j; jj < j + block_jump_down; jj++) {
+    //         //             B[jj][ii] = A[ii][jj];
+    //         //         }
+    //         //     }
+    //         // }
     //     }
     // }
+
+//     int blocksize = 4; // seems like out incers don't actually matter, this DOES
+    
+//     // this goes left -> right
+//     for (int j = 0; j < M; j += blocksize) { // col block increaser
+//         for (int i = 0; i < N; i += blocksize) { // row block increaser
+     
+//             for (int ii = i; ii < i + blocksize; ii++) {
+//                 for (int jj = j; jj < j + blocksize; jj++) {
+//                     B[jj][ii] = A[ii][jj];
+//                 }
+//             }
+//         }
+//     }
 //   int blocksize = 4;
 //   int inc = 64;
 
