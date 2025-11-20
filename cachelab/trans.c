@@ -230,21 +230,137 @@ int isDiagonal(int i, int j) {
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
-    
- int blocksize = 4;
+int blocksize = 4;
 //  int temp;
  int i;
 //  int j; 
  int ii;
  int jj;
  int ff = 0;
- int a_row;  int a_col; //int b_col;int b_row;
+ int a_row; int a_col; 
+
+  // STEP 1, place the contents of Diags of A into right shifted diags of B
+  for (i = 0; i < N - 8; i += 8) {
+    for (ii = i; ii < i + 8; ii++){
+      for (jj = i; jj < i + 8; jj++) {
+        B[ii][jj + 8] = A[ii][jj];
+      }
+    }
+  }
+
+  // avoid final problem by putting to left
+   for (ii = N - 8; ii < N; ii++) {
+      for (jj = N - 8; jj < N; jj++) {
+        B[ii][jj - 8] = A[ii][jj];
+      }
+   }
+ 
+
+   // do the lower half in a zig zag pattern
+ // need to iterate 2 * N times, then - 2, then - 2
+  // need to start in upper left block, then down, then right, then down, then right....
+  // and a has to be opposite.
+  ff = 0;
+  a_row = 0; a_col = 0; i = N; 
+
+  while (a_col < i) {
+      // transpose this block
+      for (ii = a_row; ii < a_row + blocksize; ii++){
+          for (jj = a_col; jj < a_col + blocksize; jj++) {
+              // B[jj][ii] = A[ii][jj];
+              if ((a_row >= 56 && a_row < 64) && (a_col >= 56 && a_col < 64)) {
+                  B[jj][ii] = B[ii][jj - 8];
+              } else {
+                    B[jj][ii] = B[ii][jj + 8];
+              }
+              
+          }
+      }
+
+      if (ff == 0) {
+          a_col += blocksize;
+          ff = 1;
+      } else {  
+          a_row += blocksize;
+          ff = 0;
+      }
+  }
+
+
+  ff = 0;
+  a_row = 0; a_col = 0; i = N; 
+  
+    while (a_row < i) {
+     
+        if (a_row == a_col) {
+          
+          if (ff == 0) {
+            a_row += blocksize;
+            ff = 1;
+          } else {  
+            a_col += blocksize;
+            ff = 0;
+          }
+          continue;
+        }
+      // transpose this block
+      for (ii = a_row; ii < a_row + blocksize; ii++){
+        for (jj = a_col; jj < a_col + blocksize; jj++) {
+         // B[jj][ii] = A[ii][jj];
+            if ((a_row >= 56 && a_row < 64) && (a_col >= 56 && a_col < 64)) {
+                B[jj][ii] = B[ii][jj - 8];
+            } else {
+                B[jj][ii] = B[ii][jj + 8];
+            }
+        }
+      }
+
+      if (ff == 0) {
+        a_row += blocksize;
+        ff = 1;
+      } else {  
+        a_col += blocksize;
+        ff = 0;
+      }
+    }
+ 
+
+  // handle diagonals SPECIFICALLY
+//   for (i = 0; i < N; i += blocksize) { // row block increaser
+//     for (j = 0; j < M; j += blocksize) { // col block increaser
+        
+//       if (isDiagonal(i, j)) { // for now since buggy
+
+//         if (j < M - 8) { // NOT the last row
+//           for (int ii = i; ii < i + blocksize; ii++) { // reach ahead and pull from B!
+//               for (int jj = j; jj < j + blocksize; jj++) {
+//                   B[jj][ii] = B[ii][jj + 8];
+//               }
+//           }
+//         } else { // mitigate damage on final diag block
+//             for (int ii = i; ii < i + blocksize; ii++) { // reach ahead and pull from B!
+//               for (int jj = j; jj < j + blocksize; jj++) {
+//                   B[jj][ii] = B[ii][jj - 8];
+//               }
+//             }
+//           }
+//         }
+//       } 
+//     }
+  
+
+
+
+
+
+
  // do the lower half in a zig zag pattern
  // need to iterate 2 * N times, then - 2, then - 2
   // need to start in upper left block, then down, then right, then down, then right....
   // and a has to be opposite.
-  a_row = 0; a_col = 0;  i = N; 
-  for (int k = 1; k <= (N / 8); k++) {
+  ff = 0;
+  a_row = 0; a_col = 8; i = N; 
+  for (int k = 2; k <= (N / 8); k++) {
     while (a_col < i) {
       // transpose this block
       for (ii = a_row; ii < a_row + blocksize; ii++){
@@ -267,9 +383,10 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
   }
 
   ff = 0;
-  a_row = 4; a_col = 0;  i = N; 
-  for (int k = 1; k <= (N / 8); k++) {
+  a_row = 8; a_col = 0; i = N; 
+  for (int k = 2; k <= (N / 8); k++) {
     while (a_row < i) {
+     
       // transpose this block
       for (ii = a_row; ii < a_row + blocksize; ii++){
         for (jj = a_col; jj < a_col + blocksize; jj++) {
@@ -289,6 +406,85 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
     a_row = 8 * k;
     a_col = 0;
   }
+
+  // final edge case for now: need to fill in the weird gaps
+   a_row = 8; a_col = 4;
+   for (int k = 0; k < 7; k++) {
+    for (ii = a_row; ii < a_row + blocksize; ii++) {
+      for (jj = a_col; jj < a_col + blocksize; jj++) {
+         B[jj][ii] = A[ii][jj];
+      }
+    }
+
+    for (ii = a_row; ii < a_row + blocksize; ii++) {
+      for (jj = a_col; jj < a_col + blocksize; jj++) {
+        B[ii][jj] = A[jj][ii];
+      }
+    }
+    a_row += 8; a_col += 8;
+   }
+
+ 
+
+    
+//  int blocksize = 4;
+// //  int temp;
+//  int i;
+// //  int j; 
+//  int ii;
+//  int jj;
+//  int ff = 0;
+//  int a_row;  int a_col; //int b_col;int b_row;
+//  // do the lower half in a zig zag pattern
+//  // need to iterate 2 * N times, then - 2, then - 2
+//   // need to start in upper left block, then down, then right, then down, then right....
+//   // and a has to be opposite.
+//   a_row = 0; a_col = 0;  i = N; 
+//   for (int k = 1; k <= (N / 8); k++) {
+//     while (a_col < i) {
+//       // transpose this block
+//       for (ii = a_row; ii < a_row + blocksize; ii++){
+//         for (jj = a_col; jj < a_col + blocksize; jj++) {
+//           B[jj][ii] = A[ii][jj];
+//         }
+//       }
+
+//       if (ff == 0) {
+//         a_col += blocksize;
+//         ff = 1;
+//       } else {  
+//         a_row += blocksize;
+//         ff = 0;
+//       }
+//     }
+//     ff = 0;
+//     a_row = 0;
+//     a_col = 8 * k;
+//   }
+
+//   ff = 0;
+//   a_row = 4; a_col = 0;  i = N; 
+//   for (int k = 1; k <= (N / 8); k++) {
+//     while (a_row < i) {
+//       // transpose this block
+//       for (ii = a_row; ii < a_row + blocksize; ii++){
+//         for (jj = a_col; jj < a_col + blocksize; jj++) {
+//           B[jj][ii] = A[ii][jj];
+//         }
+//       }
+
+//       if (ff == 0) {
+//         a_row += blocksize;
+//         ff = 1;
+//       } else {  
+//         a_col += blocksize;
+//         ff = 0;
+//       }
+//     }
+//     ff = 0;
+//     a_row = 8 * k;
+//     a_col = 0;
+//   }
     
 //  int blocksize = 8;
 //  int temp;
