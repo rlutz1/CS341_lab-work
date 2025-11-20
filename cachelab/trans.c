@@ -272,7 +272,7 @@ blocksize = 4;
         }
       }
 
-        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
         for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
             B[jj][ii] = B[ii][jj + 8];
         }
