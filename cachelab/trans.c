@@ -229,12 +229,7 @@ int isDiagonal(int i, int j) {
 
 char best_64_func[] = "Best For 64";
 void best_64(int M, int N, int A[N][M], int B[M][N]) {
-
-     // new attempt
-  int blocksize = 8; // first to 8 for the diags
-  int i; int j; int ii; int jj;
-
-  // step 1: handle the diagonals.
+    int blocksize = 8; int i; int j; int ii; int jj;
 
   for (i = 0; i < N - blocksize; i += blocksize) {
     for (ii = i; ii < i + blocksize; ii++){
@@ -256,7 +251,7 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
   // now, let's fill the diagonals FROM B
   // we're gonna fill as a square shape starting in top left
-blocksize = 4;
+  blocksize = 4;
   for (i = 0, j = 0; i < N; i += 8, j += 8) {
 
     if (i < M - 8) { // NOT the last row  
@@ -272,7 +267,7 @@ blocksize = 4;
         }
       }
 
-      for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
         for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
             B[jj][ii] = B[ii][jj + 8];
         }
@@ -311,7 +306,6 @@ blocksize = 4;
     }
   }
 
-
   blocksize = 4;
 
   // try the square pattern used above
@@ -342,12 +336,57 @@ blocksize = 4;
               B[jj][ii] = A[ii][jj];
           }
         }
-
       }
     }
   }
 
+//   // too much slower than with the pre-work
+//   int temp;
+//    for (int i = 0; i < N; i += blocksize) { // row block increaser
+//       for (int j = 0; j < M; j += blocksize) { // col block increaser
+//           if (isDiagonal(i, j)) {
+//               for (int ii = i; ii < i + 4; ii++) { // fill the upper left square
+//                 temp = A[ii][ii]; // load up A
+//                 for (int jj = j; jj < j + 4; jj++) {
+//                     if (jj != ii) {
+//                         B[jj][ii] = A[ii][jj];
+//                     }
+//                 }
+//                 B[ii][ii] = temp; // load up b for next it
+//               }
 
+//              for (int ii = i + 3; ii >= i; ii--) { // fill the upper right square bottom up
+//                 temp = A[ii][ii]; // load up A
+//                 for (int jj = j + 4; jj < j + 8; jj++) {
+//                     if (jj != ii) {
+//                         B[jj][ii] = A[ii][jj];
+//                     }
+//                 }
+//                 B[ii][ii] = temp; // load up b for next it
+//               }
+
+//             for (int ii = i + 4; ii < i + 8; ii++) { // fill the bottom right square
+//                 temp = A[ii][ii]; // load up A
+//                 for (int jj = j + 4; jj < j + 8; jj++) {
+//                     if (jj != ii) {
+//                         B[jj][ii] = A[ii][jj];
+//                     }
+//                 }
+//                 B[ii][ii] = temp; // load up b for next it
+//               }
+
+//              for (int ii = i + 7; ii >= i + 4; ii--) { // fill the bottom left square // bottom up
+//                 temp = A[ii][ii]; // load up A
+//                 for (int jj = j; jj < j + 4; jj++) {
+//                     if (jj != ii) {
+//                         B[jj][ii] = A[ii][jj];
+//                     }
+//                 }
+//                 B[ii][ii] = temp; // load up b for next it
+//               }
+//           }
+//       }
+//   }
 
 
 
