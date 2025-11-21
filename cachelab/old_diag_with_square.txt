@@ -2,15 +2,15 @@ S 10d0c0,1 miss
 L 18d160,8 miss 
 L 18d0e4,4 miss 
 L 18d0e0,4 hit 
-L 10d0e0,4 miss eviction 
-L 10d0e4,4 hit 
-S 14d1e0,4 miss 
+L 10d0e0,4 miss eviction A[0][0]
+L 10d0e4,4 hit A[0][1]
+S 14d1e0,4 miss B[1][0]
 L 10d0e8,4 hit 
 S 14d2e0,4 miss 
 L 10d0ec,4 hit 
-S 14d3e0,4 miss 
-S 14d0e0,4 miss eviction 
-L 10d1e4,4 miss eviction 
+S 14d3e0,4 miss B[3][0]
+S 14d0e0,4 miss eviction B[0][0]
+L 10d1e4,4 miss eviction A[1][1]
 L 10d1e0,4 hit 
 S 14d0e4,4 hit 
 L 10d1e8,4 hit 
@@ -18,7 +18,7 @@ S 14d2e4,4 hit
 L 10d1ec,4 hit 
 S 14d3e4,4 hit 
 S 14d1e4,4 miss eviction 
-L 10d2e8,4 miss eviction 
+L 10d2e8,4 miss eviction A[2][2]
 L 10d2e0,4 hit 
 S 14d0e8,4 hit 
 L 10d2e4,4 hit 
@@ -26,16 +26,16 @@ S 14d1e8,4 hit
 L 10d2ec,4 hit 
 S 14d3e8,4 hit 
 S 14d2e8,4 miss eviction 
-L 10d3ec,4 miss eviction 
+L 10d3ec,4 miss eviction A[3][3]
 L 10d3e0,4 hit 
 S 14d0ec,4 hit 
 L 10d3e4,4 hit 
 S 14d1ec,4 hit 
-L 10d3e8,4 hit 
-S 14d2ec,4 hit 
-S 14d3ec,4 miss eviction 
-L 10d0e0,4 miss eviction 
-L 10d0f0,4 hit 
+L 10d3e8,4 hit A[3][2]
+S 14d2ec,4 hit B[2][3]
+S 14d3ec,4 miss eviction B[3][3]
+L 10d0e0,4 miss eviction A[0][4]
+L 10d0f0,4 hit B[4][0]
 S 14d4e0,4 miss eviction 
 L 10d0f4,4 miss eviction 
 S 14d5e0,4 miss eviction 

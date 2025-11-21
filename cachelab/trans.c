@@ -308,22 +308,31 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
   blocksize = 4;
 
-  // try the square pattern used above
+  // try the sideways U pattern to fill with minimal misses generally.
   for (i = 0; i < N; i += 8) { // inc by 8 blocks here
     for (j = 0; j < M; j += 8) {
       if (!isDiagonal(i, j)) { // PLEASE don't redo the diagonals lol
-        // upper left 
+        // upper left
+
+         for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+
         for (int ii = i; ii < i + blocksize; ii++) { // fill the upper left square
           for (int jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           }
         }
 
-        for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
-          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+       
+        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+          for (int jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           }
         }
+        
 
         for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
           for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
@@ -331,11 +340,7 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
           }
         }
 
-        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
-          for (int jj = j; jj < j + blocksize; jj++) {
-              B[jj][ii] = A[ii][jj];
-          }
-        }
+        
       }
     }
   }
