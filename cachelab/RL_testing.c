@@ -990,6 +990,33 @@ void normal(int M, int N, int A[N][M], int B[M][N]) {
     }
 }
 
+// for this we are receiving a 67 x 61
+// and the OUTPUT will be 61 x 67
+void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
+
+  int row_A = 0;
+  int col_A = 0; int col_trav; int counter; int offset;
+  int blocksize = 8;
+
+  for (offset = 0; offset < M; offset += blocksize) {
+    row_A = 0;
+    col_A = offset;
+    while (row_A < N) { // less than 67, don't reach past last
+      for (col_trav = col_A, counter = 0; counter < blocksize; col_trav = (col_trav + 1) % M, counter++) {
+        printf("loading (%d, %d)\n", row_A, col_trav);
+        B[col_trav][row_A] = A[row_A][col_trav];
+      }
+
+      col_A = (col_A + 3) % M;
+      row_A++;
+    }
+  }
+
+  
+
+
+}
+
 int main() {
   // printf("jsadksnd");
   // int M = 8;
@@ -1016,20 +1043,20 @@ int main() {
 
   // int B[4][4] = {0};
   const int size = 64;
-  int M = size; int N = size;
-  int A[size][size];
-  int B[size][size];
+  int M = 61; int N = 67;
+  int A[N][M];
+  int B[M][N];
 
   init(M, N, A);
   initZ(M, N, B);
   
   // best_32(M, N, A, B);
-  best_64(M, N, A, B);
+  best_67_61(M, N, A, B);
    printf("done:\n");
   printM(M, N, B);
   
-  printf("A\n");
-  printM(M, N, A);
+  // printf("A\n");
+  // printM(M, N, A);
   
 
  

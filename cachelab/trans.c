@@ -100,81 +100,7 @@ int i, j, tmp;
 
 }
 
-/**
- * BAD ATTEMPT
- * has WAY more accesses in general, which is a problem.
- */
-char blocking_attempt[] = "Blocking Attempt";
-void blocker(int M, int N, int A[N][M], int B[M][N]) {
 
-    int last_size = N; // we are assuming M == N here!
-    // int last_size = N / (32 / 4); // N / 8
-    int row;
-    int col; 
-    int temp; // adding temp makes no difference.
-
-     for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
-
-        // will iterate 1, then 2, then 4...
-        for (int starting_place = 0; starting_place < N - 1; starting_place += last_size) { // size to jump for next block
-
-          for (int row_counter = 0; row_counter < log; row_counter++) { // needs to iterate 4 times
-
-              // always start with log, offset by the jump, and through how many "last rows" we have
-              row = log + starting_place + (row_counter % log); 
-
-              // now, the columns...
-              // i guess we can just have its own jumper
-              for (int col_jumper = 0; col_jumper < N - 1; col_jumper += last_size) { // size to jump for next block
-                for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
-                      
-                    col = col_jumper + (col_counter % log);
-                    temp = A[col][row];
-                    B[row][col] = temp;
-                    
-                }
-              }
-            //   B[row][row] = A[row][row];
-            }
-        }
-        last_size /= 2;
-    }
-
-    // last_size = N / (32 / 4); // N / 8
-    last_size = N;
-
-    for (int log = (N / 2); log > 0; log /= 2) { // N = 8, iterate 4, 2, 1 -- 3 times
-
-        // will iterate 1, then 2, then 4...
-        for (int starting_place = 0; starting_place < N - 1; starting_place += last_size) { // size to jump for next block
-
-          for (int row_counter = 0; row_counter < log; row_counter++) { // needs to iterate 4 times
-
-              // always start with log, offset by the jump, and through how many "last rows" we have
-              row = log + starting_place + (row_counter % log); 
-
-              // now, the columns...
-              // i guess we can just have its own jumper
-              for (int col_jumper = 0; col_jumper < N - 1; col_jumper += last_size) { // size to jump for next block
-                for(int col_counter = 0; col_counter < log; col_counter++) { // 0 -> 4, 0 -> 2, 0 -> 1
-                      
-                    col = col_jumper + (col_counter % log);
-                    temp = A[row][col]; 
-                    B[col][row] = temp; // i think this could be a major problem.
-                    
-                }
-              }
-            }
-        }
-        last_size /= 2;
-    }
-
-    // don't like this
-    for (int i = 0; i < N; i++) {
-      B[i][i] = A[i][i];
-    }
-
-} // end method
 
 char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
@@ -377,6 +303,29 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 }
 
 
+char best_67_61_func[] = "Best For 61x67";
+void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
+
+  int row_A = 0;
+  int col_A = 0; int col_trav; int counter; int offset;
+  int blocksize = 8;
+
+  for (offset = 0; offset < M; offset += blocksize) {
+    row_A = 0;
+    col_A = offset;
+    while (row_A < N) { // less than 67, don't reach past last
+      for (col_trav = col_A, counter = 0; counter < blocksize; col_trav = (col_trav + 1) % M, counter++) {
+        B[col_trav][row_A] = A[row_A][col_trav];
+      }
+
+      col_A = (col_A + 3) % M;
+      row_A++;
+    }
+  }
+
+}
+
+
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -396,6 +345,7 @@ void registerFunctions()
     // registerTransFunction(blocker, blocking_attempt); 
     registerTransFunction(best_32, best_32_func); 
     registerTransFunction(best_64, best_64_func); 
+    registerTransFunction(best_67_61, best_67_61_func); 
 }
 
 /* 
