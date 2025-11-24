@@ -306,22 +306,140 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 char best_67_61_func[] = "Best For 61x67";
 void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
 
-  int row_A = 0;
-  int col_A = 0; int col_trav; int counter; int offset;
-  int blocksize = 8;
+  // let's try this but in a diagonal pattern
+  int i; int j; int ii; int jj;
+  int blocksize = 4;
 
-  for (offset = 0; offset < M; offset += blocksize) {
-    row_A = 0;
-    col_A = offset;
-    while (row_A < N) { // less than 67, don't reach past last
-      for (col_trav = col_A, counter = 0; counter < blocksize; col_trav = (col_trav + 1) % M, counter++) {
-        B[col_trav][row_A] = A[row_A][col_trav];
-      }
 
-      col_A = (col_A + 3) % M;
-      row_A++;
+  // try the sideways U pattern to fill with minimal misses generally.
+  for (j = 0; j < M; j += 8) { // this makes B blocks move rowwise, A blocks column wise.
+    for (i = 0; i < N; i += 8) { // inc by 8 blocks here
+
+         for (ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+          for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+            if (ii < N && jj < M)
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+
+
+        for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+          for (jj = j; jj < j + blocksize; jj++) {
+            if (ii < N && jj < M)
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+
+
+       
+        for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+          for (jj = j; jj < j + blocksize; jj++) {
+            if (ii < N && jj < M)
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+       
+        for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+          for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+            if (ii < N && jj < M)
+              B[jj][ii] = A[ii][jj];
+          }
+        }
+      
     }
   }
+ 
+  
+  // int i; int j; int ii; int jj;
+  // int blocksize = 4;
+
+  // // try the sideways U pattern to fill with minimal misses generally.
+  // for (i = 0; i < N; i += 8) { // inc by 8 blocks here
+  //   for (j = 0; j < M; j += 8) {
+
+  //        for (ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+  //       for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+       
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+        
+
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+      
+  //   }
+  // }
+
+  // int i; int j; int ii; int jj;
+  // int blocksize = 4;
+
+  // for (i = N - 1; i >= 0; i -= blocksize) {
+  //   for (j = M - 1; j >= 0; j -= blocksize) {
+      
+  //     for (ii = i; ii > i - blocksize; ii--) {
+  //       for (jj = j; jj > j - blocksize; jj--) {
+  //         if (ii >= 0 && jj >= 0) {
+  //           B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+  //     } 
+
+  //   }
+  // }
+
+//    int i; int j; int ii; int jj;
+//   int blocksize = 4;
+// for (j = 0; j < N; j += blocksize) { // slightly better by ~ 100
+//   for (i = 0; i < N; i += blocksize) {
+    
+      
+//       for (ii = i; ii < i + blocksize; ii++) {
+//         for (jj = j; jj < j + blocksize; jj++) {
+//           if (ii < N && jj < M) {
+//             B[jj][ii] = A[ii][jj];
+//           }
+//         }
+//       } 
+
+//     }
+//   }
+
+  // int row_A = 0;
+  // int col_A = 0; int col_trav; int counter; int offset;
+  // int blocksize = 8;
+
+  // for (offset = 0; offset < M; offset += blocksize) {
+  //   row_A = 0;
+  //   col_A = offset;
+  //   while (row_A < N) { // less than 67, don't reach past last
+  //     for (col_trav = col_A, counter = 0; counter < blocksize; col_trav = (col_trav + 1) % M, counter++) {
+  //       B[col_trav][row_A] = A[row_A][col_trav];
+  //     }
+
+  //     col_A = (col_A + 3) % M;
+  //     row_A++;
+  //   }
+  // }
 
 }
 
