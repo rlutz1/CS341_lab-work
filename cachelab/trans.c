@@ -164,88 +164,86 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
     } // end loop
 
     // fill next row OVER to left with bottom half from A
-    for (ii = i + 4, diag_row_placeholder = 0; ii < i + double_blocksize; ii++, diag_row_placeholder++){
+    for (ii = i + blocksize, diag_row_placeholder = 0; ii < i + double_blocksize; ii++, diag_row_placeholder++){
       for (jj = j, diag_col_placeholder = 48; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
         B[diag_row_placeholder][diag_col_placeholder] = A[ii][jj]; // NEXT 8 col of B, 48 -> 55
       } // end loop
     } // end loop
 
-    // THEN, we fill B accordingly and row wise by 4x4 blocks from B rows
+    // THEN, we fill B accordingly and row wise by 4x4 blocks from B rows in a sideways u shape
     for (ii = i, diag_row_placeholder = 0; ii < i + blocksize; ii++, diag_row_placeholder++) { // fill the upper left square
       for (jj = j, diag_col_placeholder = 56; jj < j + blocksize; jj++, diag_col_placeholder++) {
           B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
-      }
-    }
+      } // end loop
+    } // end loop
 
     for (ii = i + blocksize, diag_row_placeholder = 0; ii < i + double_blocksize; ii++, diag_row_placeholder++) { // fill the upper right square
       for (jj = j, diag_col_placeholder = 48; jj < j + blocksize; jj++, diag_col_placeholder++) {
           B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
-      }
-    }
+      }  // end loop
+    }  // end loop
 
 
     for (ii = i, diag_row_placeholder = 0; ii < i + blocksize; ii++, diag_row_placeholder++) { // fill the bottom left square
       for (jj = j + blocksize, diag_col_placeholder = 60; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
           B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
-      }
-    }
+      } // end loop
+    }  // end loop
 
     for (ii = i + blocksize, diag_row_placeholder = 0; ii < i + double_blocksize; ii++, diag_row_placeholder++) { // fill the bottom right square
       for (jj = j + blocksize, diag_col_placeholder = 52; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
           B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
-      }
-    }
+      } // end loop
+    } // end loop
    
-  }
+  } // end loop
 
   // THEN, we do the other half diagonals. which means we use the bottom left rows of B 
   // instead and fill the same way.
+  for (i = (N / 2), j = (N / 2); i < N; i += double_blocksize, j += double_blocksize) {
 
-  blocksize = 4;
-  for (i = (N / 2), j = (N / 2); i < N; i += 8, j += 8) {
     // fill top row from A into BOTTOM LEFT rows
-    for (ii = i, diag_row_placeholder = 60; ii < i + 4; ii++, diag_row_placeholder++){
-      for (jj = j, diag_col_placeholder = 0; jj < j + 8; jj++, diag_col_placeholder++) {
-        B[diag_row_placeholder][diag_col_placeholder] = A[ii][jj]; // LAST 8 col of B, 56 -> 63
-      }
-    }
+    for (ii = i, diag_row_placeholder = 60; ii < i + blocksize; ii++, diag_row_placeholder++){
+      for (jj = j, diag_col_placeholder = 0; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
+        B[diag_row_placeholder][diag_col_placeholder] = A[ii][jj]; // FIRST 8 col of B, 0 -> 7 in LAST ROW
+      } // end loop
+    } // end loop
 
     // fill next row OVER to RIGHT with bottom half from A
-    for (ii = i + 4, diag_row_placeholder = 60; ii < i + 8; ii++, diag_row_placeholder++){
-      for (jj = j, diag_col_placeholder = 8; jj < j + 8; jj++, diag_col_placeholder++) {
-        B[diag_row_placeholder][diag_col_placeholder] = A[ii][jj]; // LAST 8 col of B, 56 -> 63
-      }
-    }
+    for (ii = i + blocksize, diag_row_placeholder = 60; ii < i + double_blocksize; ii++, diag_row_placeholder++){
+      for (jj = j, diag_col_placeholder = 8; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
+        B[diag_row_placeholder][diag_col_placeholder] = A[ii][jj]; // NEXT 8 col of B, 8 -> 15 in LAST ROW
+      } // end loop
+    } // end loop
 
     // THEN, we fill B accordingly and row wise by 4x4 blocks from B rows
-
     for (int ii = i, diag_row_fill = 60; ii < i + blocksize; ii++, diag_row_fill++) { // fill the upper left square
       for (int jj = j, diag_col_fill = 0; jj < j + blocksize; jj++, diag_col_fill++) {
           B[jj][ii] = B[diag_row_fill][diag_col_fill];
-      }
-    }
+      } // end loop
+    } // end loop
 
-    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + (2 * blocksize); ii++, diag_row_fill++) { // fill the upper right square
+    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + double_blocksize; ii++, diag_row_fill++) { // fill the upper right square
       for (int jj = j, diag_col_fill = 8; jj < j + blocksize; jj++, diag_col_fill++) {
           B[jj][ii] = B[diag_row_fill][diag_col_fill];
-      }
-    }
+      } // end loop
+    } // end loop
 
 
     for (int ii = i, diag_row_fill = 60; ii < i + blocksize; ii++, diag_row_fill++) { // fill the bottom left square
-      for (int jj = j + blocksize, diag_col_fill = 4; jj < j + (2 * blocksize); jj++, diag_col_fill++) {
+      for (int jj = j + blocksize, diag_col_fill = 4; jj < j + double_blocksize; jj++, diag_col_fill++) {
           B[jj][ii] = B[diag_row_fill][diag_col_fill];
-      }
-    }
+      } // end loop
+    } // end loop
 
 
-    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + (2 * blocksize); ii++, diag_row_fill++) { // fill the bottom right square
-      for (int jj = j + blocksize, diag_col_fill = 12; jj < j + (2 * blocksize); jj++, diag_col_fill++) {
+    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + double_blocksize; ii++, diag_row_fill++) { // fill the bottom right square
+      for (int jj = j + blocksize, diag_col_fill = 12; jj < j + double_blocksize; jj++, diag_col_fill++) {
           B[jj][ii] = B[diag_row_fill][diag_col_fill];
-      }
-    }
+      } // end loop
+    } // end loop
    
-  }
+  } // end loop
 
 
   // GENERAL CASE --------------------------------------------------------
