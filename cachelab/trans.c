@@ -306,48 +306,151 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 char best_67_61_func[] = "Best For 61x67";
 void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
 
-  // let's try this but in a diagonal pattern
   int i; int j; int ii; int jj;
-  int blocksize = 4;
+  int blocksize = 8;
+
+  for (j = 0; j < N; j += blocksize) {
+    for (i = 0; i < N; i += blocksize) {
+    
+     
+      for (ii = i; ii < i + blocksize; ii++) {
+        for (jj = j; jj < j + blocksize; jj++) {
+          if (ii < N && jj < M) {
+            B[jj][ii] = A[ii][jj];
+          }
+        }
+      }
+
+
+    }
+  }
+
+  // // try the sideways U pattern to fill with minimal misses generally.
+  // for (j = 0; j < M; j += 8) { // this makes B blocks move rowwise, A blocks column wise.
+  //   for (i = N - 8; i >= 0; i -= 8) { // inc by 8 blocks here
+
+  //        for (ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+
+  //       for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+
+       
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+       
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+      
+  //   }
+  // }
+ 
+  
+
 
 
   // try the sideways U pattern to fill with minimal misses generally.
-  for (j = 0; j < M; j += 8) { // this makes B blocks move rowwise, A blocks column wise.
-    for (i = 0; i < N; i += 8) { // inc by 8 blocks here
-
-         for (ii = i; ii < i + blocksize; ii++) { // fill the upper right square
-          for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
-            if (ii < N && jj < M)
-              B[jj][ii] = A[ii][jj];
-          }
-        }
-
-
-        for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
-          for (jj = j; jj < j + blocksize; jj++) {
-            if (ii < N && jj < M)
-              B[jj][ii] = A[ii][jj];
-          }
-        }
-
-
-       
-        for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
-          for (jj = j; jj < j + blocksize; jj++) {
-            if (ii < N && jj < M)
-              B[jj][ii] = A[ii][jj];
-          }
-        }
-       
-        for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
-          for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
-            if (ii < N && jj < M)
-              B[jj][ii] = A[ii][jj];
-          }
-        }
+  // LAST!!!!!!!
+  // for (i = 0; i < N; i += 8) { // inc by 8 blocks here
+  //   for (j = 0; j < M; j += 8) { // this makes B blocks move rowwise, A blocks column wise.
+    
       
-    }
-  }
+
+  //     for (ii = i, k = 0; ii < i + blocksize; ii++, k++) { // fill the upper right square
+  //       for (jj = (j + (blocksize * k) + blocksize) % M, kk = 0; kk < blocksize; jj = (jj + 1) % M, kk++) {
+  //         if (ii < N)
+  //           B[jj][ii] = A[ii][jj];
+  //       }
+  //     }
+
+  //       for (ii = i, k = 0; ii < i + blocksize; ii++, k++) { // fill the upper left square
+  //         for (jj = (j + (blocksize * k)) % M, kk = 0; kk < 4; jj = (jj + 1) % M, kk++) {
+  //           if (ii < N)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+
+  //       for (ii = i + blocksize, k = 0; ii < i + (2 * blocksize); ii++, k++) { // fill the bottom left square
+  //         for (jj = (j + (blocksize * k) + 16) % M, kk = 0; kk < 4; jj = (jj + 1) % M, kk++) {
+  //           if (ii < N)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+       
+  //       for (ii = i + blocksize, k = 0; ii < i + (2 * blocksize); ii++, k++) { // fill the bottom right square
+  //         for (jj = (j + (blocksize * k) + 16 + blocksize) % M, kk = 0; kk < 4; jj = (jj + 1) % M, kk++) {
+  //           if (ii < N)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+  
+  //   }
+  // }
+  // END LAST
+
+  // BEST!!!
+  // // let's try this but in a diagonal pattern
+  // int i; int j; int ii; int jj;
+  // int blocksize = 4;
+
+
+  // // try the sideways U pattern to fill with minimal misses generally.
+  // for (j = 0; j < M; j += 8) { // this makes B blocks move rowwise, A blocks column wise.
+  //   for (i = 0; i < N; i += 8) { // inc by 8 blocks here
+
+  //        for (ii = i; ii < i + blocksize; ii++) { // fill the upper right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+
+  //       for (ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+
+
+       
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+  //         for (jj = j; jj < j + blocksize; jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+       
+  //       for (ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
+  //         for (jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
+  //           if (ii < N && jj < M)
+  //             B[jj][ii] = A[ii][jj];
+  //         }
+  //       }
+      
+  //   }
+  // }
  
   
   // int i; int j; int ii; int jj;
