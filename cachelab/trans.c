@@ -11,7 +11,10 @@
 #include "cachelab.h"
 
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
-
+void trans(int M, int N, int A[N][M], int B[M][N]);
+void best_32(int M, int N, int A[N][M], int B[M][N]);
+void best_64(int M, int N, int A[N][M], int B[M][N]);
+void best_61_67(int M, int N, int A[N][M], int B[M][N]);
 /* 
  * transpose_submit - This is the solution transpose function that you
  *     will be graded on for Part B of the assignment. Do not change
@@ -22,7 +25,16 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
-}
+  if (M == 32 && N == 32) { // optimized 32x32 output size
+    best_32(M, N, A, B);
+  } else if (M == 64 && N == 64) { // optimized 64x64 output size
+    best_64(M, N, A, B);
+  } else if (M == 61 && N == 67) { // optimized 61x67 output size
+    best_61_67(M, N, A, B);
+  } else { // given anything else, no optimization built.
+    trans(M, N, A, B);
+  } // end if
+} // end submission function
 
 /* 
  * You can define additional transpose functions below. We've defined
@@ -35,73 +47,28 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 char trans_desc[] = "Simple row-wise scan transpose";
 void trans(int M, int N, int A[N][M], int B[M][N])
 {
-
-int i, j, tmp;
-  int diag;
-
-    for (i = 0; i < N; i++) { // backwards rows
-      diag = A[i][i];
-      for (j = 0; j < M; j++) { // backward cols
-          if (i != j) {
-            tmp = A[i][j];
-            B[j][i] = tmp;
-          }
-      }
-      B[i][i] = diag;
+  int i, j;
+  for (i = 0; i < N; i++) { 
+    for (j = 0; j < M; j++) { 
+      B[j][i] = A[i][j];
     }
-
-// int i, j, tmp;
-//   int diag;
-
-//     for (i = N - 1; i >= 0; i--) { // backwards rows
-//       diag = A[i][i];
-//       for (j = M - 1; j >= 0; j--) { // backward cols
-//           if (i != j) {
-//             tmp = A[i][j];
-//             B[j][i] = tmp;
-//           }
-//       }
-//       B[i][i] = diag;
-//     }
-
-// does a teensy worse as expected
-//  int i, j, tmp;
-
-//     for (i = 0; i < N; i++) {
-//         for (j = 0; j < M; j++) {
-//             if (i != j) {
-//                 tmp = A[i][j];
-//                 B[j][i] = tmp;
-//             }
-            
-//         }
-//     } 
-
-    // for (i = 0; i < N; i++) {
-    //     tmp = A[i][i];
-    //     B[i][i] = tmp;
-    // }
-
-
-    // int i, j, tmp;
-
-    // for (i = 0; i < N; i++) {
-    //     for (j = 0; j < M; j++) {
-    //         tmp = A[i][j];
-    //         B[j][i] = tmp;
-    //     }
-    // } 
-    // for (i = 0; i < N; i++) {
-    //     for (j = 0; j < M; j++) {
-    //         tmp = A[i][j];
-    //         B[j][i] = tmp;
-    //     }
-    // }    
-
+  }
 }
 
+/**
+ * ====================================================
+ * FUNCTIONS WRITTEN BY HUMAN OPTIMIZED FOR EACH SIZE
+ * 
+ * note: please read documentation in report for more
+ * thorough discussion on the approach. header comments
+ * will give a brief summation only.
+ * ====================================================
+ */
 
 
+/**
+ * 
+ */
 char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
@@ -304,7 +271,7 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
 
 char best_67_61_func[] = "Best For 61x67";
-void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
+void best_61_67(int M, int N, int A[N][M], int B[M][N]) {
 
   int i; int j; int ii; int jj;
   int blocksize = 8;
@@ -348,7 +315,7 @@ void registerFunctions()
     // registerTransFunction(blocker, blocking_attempt); 
     registerTransFunction(best_32, best_32_func); 
     registerTransFunction(best_64, best_64_func); 
-    registerTransFunction(best_67_61, best_67_61_func); 
+    registerTransFunction(best_61_67, best_67_61_func); 
 }
 
 /* 

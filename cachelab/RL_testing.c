@@ -992,7 +992,7 @@ void normal(int M, int N, int A[N][M], int B[M][N]) {
 
 // for this we are receiving a 67 x 61
 // and the OUTPUT will be 61 x 67
-void best_67_61(int M, int N, int A[N][M], int B[M][N]) {
+void best_61_67(int M, int N, int A[N][M], int B[M][N]) {
 
 // let's try this but starting from end of A. doubt this will help but.
   int i; int j; int ii; int jj; int k; int kk;
@@ -1284,7 +1284,7 @@ int main() {
   initZ(M, N, B);
   
   // best_32(M, N, A, B);
-  best_67_61(M, N, A, B);
+  best_61_67(M, N, A, B);
    printf("done:\n");
   printM(M, N, B);
   
