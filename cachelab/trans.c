@@ -78,15 +78,15 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 char best_32_func[] = "Best For 32";
 void best_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
-    int temp;
+    int i, j, ii, jj, temp;
     
-    for (int i = 0; i < N; i += blocksize) { // row block increaser
-        for (int j = 0; j < M; j += blocksize) { // col block increaser
+    for (i = 0; i < N; i += blocksize) { // row block increaser
+        for (j = 0; j < M; j += blocksize) { // col block increaser
 
             if (i == j) { // if we're in a "diagonal block"
-                for (int ii = i; ii < i + blocksize; ii++) {
+                for (ii = i; ii < i + blocksize; ii++) {
                     temp = A[ii][ii]; // give A control over the row
-                    for (int jj = j; jj < j + blocksize; jj++) {
+                    for (jj = j; jj < j + blocksize; jj++) {
                         if (jj != ii) { // skip over all cols of B that will thrash A's row control
                             B[jj][ii] = A[ii][jj];
                         } // end if
@@ -95,8 +95,8 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
                 } // end loop
             } else { // otherwise, there are no overlapping set conflicts with A and B,
               // proceed normally and fill the B block as transpose of A block.
-                for (int ii = i; ii < i + blocksize; ii++) {
-                    for (int jj = j; jj < j + blocksize; jj++) {
+                for (ii = i; ii < i + blocksize; ii++) {
+                    for (jj = j; jj < j + blocksize; jj++) {
                         B[jj][ii] = A[ii][jj];
                     } // end loop 
                 } // end loop
@@ -129,8 +129,8 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
  int blocksize = 4; 
  int double_blocksize = 8;
- int i; int j; int ii; int jj; 
- int diag_row_placeholder; int diag_col_placeholder; 
+ int i, j, ii, jj; 
+ int diag_row_placeholder, diag_col_placeholder; 
 
   // we're gonna fill a little differently. instead we are going
   // to in place put the top row from A into top right row of B
@@ -199,29 +199,29 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
     } // end loop
 
     // THEN, we fill B accordingly and row wise by 4x4 blocks from B rows
-    for (int ii = i, diag_row_fill = 60; ii < i + blocksize; ii++, diag_row_fill++) { // fill the upper left square
-      for (int jj = j, diag_col_fill = 0; jj < j + blocksize; jj++, diag_col_fill++) {
-          B[jj][ii] = B[diag_row_fill][diag_col_fill];
+    for (ii = i, diag_row_placeholder = 60; ii < i + blocksize; ii++, diag_row_placeholder++) { // fill the upper left square
+      for (jj = j, diag_col_placeholder = 0; jj < j + blocksize; jj++, diag_col_placeholder++) {
+          B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
       } // end loop
     } // end loop
 
-    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + double_blocksize; ii++, diag_row_fill++) { // fill the upper right square
-      for (int jj = j, diag_col_fill = 8; jj < j + blocksize; jj++, diag_col_fill++) {
-          B[jj][ii] = B[diag_row_fill][diag_col_fill];
-      } // end loop
-    } // end loop
-
-
-    for (int ii = i, diag_row_fill = 60; ii < i + blocksize; ii++, diag_row_fill++) { // fill the bottom left square
-      for (int jj = j + blocksize, diag_col_fill = 4; jj < j + double_blocksize; jj++, diag_col_fill++) {
-          B[jj][ii] = B[diag_row_fill][diag_col_fill];
+    for (ii = i + blocksize, diag_row_placeholder = 60; ii < i + double_blocksize; ii++, diag_row_placeholder++) { // fill the upper right square
+      for (jj = j, diag_col_placeholder = 8; jj < j + blocksize; jj++, diag_col_placeholder++) {
+          B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
       } // end loop
     } // end loop
 
 
-    for (int ii = i + blocksize, diag_row_fill = 60; ii < i + double_blocksize; ii++, diag_row_fill++) { // fill the bottom right square
-      for (int jj = j + blocksize, diag_col_fill = 12; jj < j + double_blocksize; jj++, diag_col_fill++) {
-          B[jj][ii] = B[diag_row_fill][diag_col_fill];
+    for (ii = i, diag_row_placeholder = 60; ii < i + blocksize; ii++, diag_row_placeholder++) { // fill the bottom left square
+      for (jj = j + blocksize, diag_col_placeholder = 4; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
+          B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
+      } // end loop
+    } // end loop
+
+
+    for (ii = i + blocksize, diag_row_placeholder = 60; ii < i + double_blocksize; ii++, diag_row_placeholder++) { // fill the bottom right square
+      for (jj = j + blocksize, diag_col_placeholder = 12; jj < j + double_blocksize; jj++, diag_col_placeholder++) {
+          B[jj][ii] = B[diag_row_placeholder][diag_col_placeholder];
       } // end loop
     } // end loop
    
@@ -233,27 +233,27 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
     for (j = 0; j < M; j += double_blocksize) {
       if (i != j) { // skip over diagonals.
 
-        for (int ii = i; ii < i + blocksize; ii++) { // upper left square
-          for (int jj = j; jj < j + blocksize; jj++) {
+        for (ii = i; ii < i + blocksize; ii++) { // upper left square
+          for (jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           } // end loop
         } // end loop
 
-         for (int ii = i; ii < i + blocksize; ii++) { // upper right square
-          for (int jj = j + blocksize; jj < j + double_blocksize; jj++) {
+         for (ii = i; ii < i + blocksize; ii++) { // upper right square
+          for (jj = j + blocksize; jj < j + double_blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           } // end loop
         } // end loop
 
        
-        for (int ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom right square
-          for (int jj = j + blocksize; jj < j + double_blocksize; jj++) {
+        for (ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom right square
+          for (jj = j + blocksize; jj < j + double_blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           } // end loop
         } // end loop
        
-        for (int ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom left square
-          for (int jj = j; jj < j + blocksize; jj++) {
+        for (ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom left square
+          for (jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
           } // end loop
         } // end loop
@@ -271,32 +271,31 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
  * they do not sit on top of each other, and instead drift
  * diagonally.further, this means the conflict areas
  * are not consistently on the diagonals. 
- * so, we can use a simple 8x8
+ * so, we can use a simple 8x8 blocking technique, and
+ * by moving the B blocks rowwise and A blocks columnwise, 
+ * we are able to minimize misses and get under the lower bound.
  */
 char best_61_67_func[] = "Best For 61x67";
 void best_61_67(int M, int N, int A[N][M], int B[M][N]) {
 
-  int i; int j; int ii; int jj;
-  int blocksize = 8;
+  int blocksize = 8; // simple 8x8 blocking
+  int i, j, ii, jj;
 
-  for (j = 0; j < M; j += blocksize) {
-    for (i = 0; i < N; i += blocksize) {
+  for (j = 0; j < M; j += blocksize) { // swapped outer loops to move B blocks rowwise
+    for (i = 0; i < N; i += blocksize) { // A blocks col-wise
     
-     
       for (ii = i; ii < i + blocksize; ii++) {
         for (jj = j; jj < j + blocksize; jj++) {
-          if (ii < N && jj < M) {
+          if (ii < N && jj < M) { // if we reach past row/col, don't access
             B[jj][ii] = A[ii][jj];
-          }
-        }
-      }
+          } // end if
+        } // end loop
+      } // end loop
 
+    } // end loop
+  } // end loop
 
-    }
-  }
-
-
-}
+} // end 61x67 optimization
 
 
 /*
@@ -312,13 +311,10 @@ void registerFunctions()
     registerTransFunction(transpose_submit, transpose_submit_desc); 
 
     /* Register any additional transpose functions */
-    registerTransFunction(trans, trans_desc); 
-
-    /* Roxanne fooling around */
-    // registerTransFunction(blocker, blocking_attempt); 
-    registerTransFunction(best_32, best_32_func); 
-    registerTransFunction(best_64, best_64_func); 
-    registerTransFunction(best_61_67, best_61_67_func); 
+    registerTransFunction(trans, trans_desc); // normal transpose
+    registerTransFunction(best_32, best_32_func); // best for 32x32
+    registerTransFunction(best_64, best_64_func); // best for 64x64
+    registerTransFunction(best_61_67, best_61_67_func); // best for 61x67
 }
 
 /* 
