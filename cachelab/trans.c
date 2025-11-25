@@ -106,24 +106,6 @@ void best_32(int M, int N, int A[N][M], int B[M][N]) {
 } // end 32x32 optimization
 
 /**
- * this is a gnarly helper function to make life easier 
- * in outlining diagonal blocks in the 64x64. 
- * it is hardcoded, but it keeps it easier for now.
- */
-int isDiagonal(int i, int j) {
-  return (
-    ((i < 8 && i >= 0) && (j < 8 && j >= 0)) ||
-    ((i < 16 && i >= 8) && (j < 16 && j >= 8)) ||
-    ((i < 24 && i >= 16) && (j < 24 && j >= 16)) ||
-    ((i < 32 && i >= 24) && (j < 32 && j >= 24)) ||
-    ((i < 40 && i >= 32) && (j < 40 && j >= 32)) ||
-    ((i < 48 && i >= 40) && (j < 48 && j >= 40)) ||
-    ((i < 56 && i >= 48) && (j < 56 && j >= 48)) ||
-    ((i < 64 && i >= 56) && (j < 64 && j >= 56)) 
-  );
-} // end helper method
-
-/**
  * for the 64x64, we need to employ a couple tactics.
  * it has the unique problem of each 8x8 block having the same
  * sets in the first 4 rows as the second 4 rows. 
@@ -200,7 +182,7 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
 
   // THEN, we do the other half diagonals. which means we use the bottom left rows of B 
   // instead and fill the same way.
-  for (i = (N / 2), j = (N / 2); i < N; i += double_blocksize, j += double_blocksize) {
+  for (i = (N / 2), j = (M / 2); i < N; i += double_blocksize, j += double_blocksize) {
 
     // fill top row from A into BOTTOM LEFT rows
     for (ii = i, diag_row_placeholder = 60; ii < i + blocksize; ii++, diag_row_placeholder++){
@@ -245,53 +227,53 @@ void best_64(int M, int N, int A[N][M], int B[M][N]) {
    
   } // end loop
 
+  // now, onto the remaining, non-diagonal blocks.
+  // access A in a sideways U pattern to fill with minimal misses generally.
+  for (i = 0; i < N; i += double_blocksize) { 
+    for (j = 0; j < M; j += double_blocksize) {
+      if (i != j) { // skip over diagonals.
 
-  // GENERAL CASE --------------------------------------------------------
-
-  blocksize = 4;
-
-  // try the sideways U pattern to fill with minimal misses generally.
-  
-  for (i = 0; i < N; i += 8) { // inc by 8 blocks here
-    for (j = 0; j < M; j += 8) {
-      if (!isDiagonal(i, j)) { // PLEASE don't redo the diagonals lol
-        // upper left
-
-         for (int ii = i; ii < i + blocksize; ii++) { // fill the upper right square
-          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
-              B[jj][ii] = A[ii][jj];
-          }
-        }
-
-        for (int ii = i; ii < i + blocksize; ii++) { // fill the upper left square
+        for (int ii = i; ii < i + blocksize; ii++) { // upper left square
           for (int jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
-          }
-        }
+          } // end loop
+        } // end loop
+
+         for (int ii = i; ii < i + blocksize; ii++) { // upper right square
+          for (int jj = j + blocksize; jj < j + double_blocksize; jj++) {
+              B[jj][ii] = A[ii][jj];
+          } // end loop
+        } // end loop
 
        
-        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom left square
+        for (int ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom right square
+          for (int jj = j + blocksize; jj < j + double_blocksize; jj++) {
+              B[jj][ii] = A[ii][jj];
+          } // end loop
+        } // end loop
+       
+        for (int ii = i + blocksize; ii < i + double_blocksize; ii++) { // bottom left square
           for (int jj = j; jj < j + blocksize; jj++) {
               B[jj][ii] = A[ii][jj];
-          }
-        }
-        
+          } // end loop
+        } // end loop
 
-        for (int ii = i + blocksize; ii < i + (2 * blocksize); ii++) { // fill the bottom right square
-          for (int jj = j + blocksize; jj < j + (2 * blocksize); jj++) {
-              B[jj][ii] = A[ii][jj];
-          }
-        }
+      } // end loop
+    } // end loop
+  } // end loop
 
-        
-      }
-    }
-  }
+} // end 64x64 optimization
 
-}
-
-
-char best_67_61_func[] = "Best For 61x67";
+/**
+ * for the 61x61, we can actually use a pretty simple
+ * blocking tactic to get it < 2000 misses.
+ * the sets are repetitive in the same way the 64x64 is, but
+ * they do not sit on top of each other, and instead drift
+ * diagonally.further, this means the conflict areas
+ * are not consistently on the diagonals. 
+ * so, we can use a simple 8x8
+ */
+char best_61_67_func[] = "Best For 61x67";
 void best_61_67(int M, int N, int A[N][M], int B[M][N]) {
 
   int i; int j; int ii; int jj;
@@ -336,7 +318,7 @@ void registerFunctions()
     // registerTransFunction(blocker, blocking_attempt); 
     registerTransFunction(best_32, best_32_func); 
     registerTransFunction(best_64, best_64_func); 
-    registerTransFunction(best_61_67, best_67_61_func); 
+    registerTransFunction(best_61_67, best_61_67_func); 
 }
 
 /* 
