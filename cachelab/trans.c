@@ -297,6 +297,41 @@ void best_61_67(int M, int N, int A[N][M], int B[M][N]) {
 
 } // end 61x67 optimization
 
+/**
+ * ====================================================
+ * FAILED ATTEMPTS -- INCLUDED FOR REPORT
+ * 
+ * these are merely included to provide evidence and 
+ * numbers for failed attempts to assist in explaining 
+ * the process to get the successful attempt.
+ * ====================================================
+ */
+
+ /**
+  * ===============
+  * 32x32 ATTEMPTS
+  * ===============
+  */
+
+ /**
+  * ===============
+  * 64x64 ATTEMPTS
+  * ===============
+  */
+
+ /**
+  * ===============
+  * 61x67 ATTEMPTS
+  * ===============
+  */
+
+
+/**
+ * ====================================================
+ * GIVEN FUNCTIONS TO RUN TEST CASES
+ * ====================================================
+ */
+
 
 /*
  * registerFunctions - This function registers your transpose
