@@ -12,7 +12,7 @@ void printM(int M, int N, int B[M][N]) {
 
 // best for 32 SO FAR
 // running with 344 misses, which is super close
-void best_32(int M, int N, int A[N][M], int B[M][N]) {
+void best_32_32(int M, int N, int A[N][M], int B[M][N]) {
   // int blocksize = 8;
   int blocksize = 8;
 
@@ -245,7 +245,7 @@ int isDiagonal(int i, int j) {
 }
 
 // work on something here...
-void best_64(int M, int N, int A[N][M], int B[M][N]) {
+void best_64_64(int M, int N, int A[N][M], int B[M][N]) {
 
   // DIAGS -----------------------------------------------------------
  int blocksize = 8; int i; int j; int ii; int jj; int diag_row_fill; int diag_col_fill; 
@@ -1283,7 +1283,7 @@ int main() {
   init(M, N, A);
   initZ(M, N, B);
   
-  // best_32(M, N, A, B);
+  // best_32_32(M, N, A, B);
   best_61_67(M, N, A, B);
    printf("done:\n");
   printM(M, N, B);
