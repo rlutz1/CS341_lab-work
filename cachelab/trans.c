@@ -75,7 +75,7 @@ void trans(int M, int N, int A[N][M], int B[M][N])
  * ii == jj points until we're ready to relinquish the set 
  * to B's control.
  */
-char best_32_32_func[] = "Best For 32";
+char best_32_32_func[] = "Best For 32x32";
 void best_32_32(int M, int N, int A[N][M], int B[M][N]) {
     int blocksize = 8;
     int i, j, ii, jj, temp;
@@ -124,7 +124,7 @@ void best_32_32(int M, int N, int A[N][M], int B[M][N]) {
  * will be filled by accessing A blocks in a sideways U shape which minimizes the misses
  * in the general-non-diagonal case well between A and B.
  */
-char best_64_64_func[] = "Best For 64";
+char best_64_64_func[] = "Best For 64x64";
 void best_64_64(int M, int N, int A[N][M], int B[M][N]) {
 
  int blocksize = 4; 
