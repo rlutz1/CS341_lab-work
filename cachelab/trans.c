@@ -425,7 +425,10 @@ void attempt_3_64_64(int M, int N, int A[N][M], int B[M][N]) {
  
 } // end attempt 
 
-
+/**
+ * attempt made to test out the idea of placing 
+ * values from A into B and then using B as the fill
+ */
 char attempt_4_64_64_func[] = "64x64, Attempt 4 - 4x4 Block, First Attempt Diag Handling, U Access";
 void attempt_4_64_64(int M, int N, int A[N][M], int B[M][N]) {
   int blocksize = 4; 
@@ -548,16 +551,60 @@ void attempt_4_64_64(int M, int N, int A[N][M], int B[M][N]) {
  
 } // end attempt 
 
-  
-
-
-
-
  /**
   * ===============
   * 61x67 ATTEMPTS
   * ===============
   */
+
+/**
+ * basic 4x4 blocking of the matrix.
+ */
+char attempt_1_61_67_func[] = "61x67, Attempt 1 - 4x4 Block, No Diag";
+void attempt_1_61_67(int M, int N, int A[N][M], int B[M][N]) {
+  int blocksize = 4; // attempt a blocksize of 4
+  int i, j, ii, jj;
+
+  for (i = 0; i < N; i += blocksize) {
+    for (j = 0; j < N; j += blocksize) {
+     
+      for (ii = i; ii < i + blocksize; ii++) {
+        for (jj = j; jj < j + blocksize; jj++) {
+          if (ii < N && jj < M) {
+            B[jj][ii] = A[ii][jj];
+          } // end if
+        } // end loop
+      } // end loop
+
+    } // end loop
+  } // end loop
+
+} // end attempt
+
+/**
+ * basic 8x8 blocking of the matrix.
+ */
+char attempt_2_61_67_func[] = "61x67, Attempt 2 - 8x8 Block, No Diag";
+void attempt_2_61_67(int M, int N, int A[N][M], int B[M][N]) {
+  int blocksize = 8; // attempt a blocksize of 4
+  int i, j, ii, jj;
+
+  for (i = 0; i < N; i += blocksize) {
+    for (j = 0; j < N; j += blocksize) {
+     
+      for (ii = i; ii < i + blocksize; ii++) {
+        for (jj = j; jj < j + blocksize; jj++) {
+          if (ii < N && jj < M) {
+            B[jj][ii] = A[ii][jj];
+          } // end if
+        } // end loop
+      } // end loop
+
+    } // end loop
+  } // end loop
+
+} // end attempt
+
 
 
 /**
