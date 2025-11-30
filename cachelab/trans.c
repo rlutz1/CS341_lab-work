@@ -606,13 +606,11 @@ void attempt_2_61_67(int M, int N, int A[N][M], int B[M][N]) {
 } // end attempt
 
 
-
 /**
  * ====================================================
  * GIVEN FUNCTIONS TO RUN TEST CASES
  * ====================================================
  */
-
 
 /*
  * registerFunctions - This function registers your transpose
@@ -640,6 +638,8 @@ void registerFunctions()
     registerTransFunction(attempt_3_64_64, attempt_3_64_64_func);
     registerTransFunction(attempt_4_64_64, attempt_4_64_64_func);
 
+    registerTransFunction(attempt_1_61_67, attempt_1_61_67_func);
+    registerTransFunction(attempt_2_61_67, attempt_2_61_67_func);
     
 }
 
